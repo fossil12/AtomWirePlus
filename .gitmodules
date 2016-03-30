@@ -1,0 +1,3 @@
+[submodule "AtomWire"]
+	path = AtomWire
+	url = https://github.com/akshays86/AtomWire.git

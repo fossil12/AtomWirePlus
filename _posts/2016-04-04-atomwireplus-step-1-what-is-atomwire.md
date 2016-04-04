@@ -1,0 +1,17 @@
+---
+layout: post
+title: "AtomWire+: Step 1 - What is AtomWire?"
+author: Angelina Risi
+---
+
+Our project, AtomWire+, aims to improve the existing AtomWire project, but to do that we need to develop our understanding of the original design and process. Thus, our project begins with a thorough read-up on the existing report and specifications and attempting to recreate the original, operational circuit.
+
+AtomWire is a system in which a master node both powers and communicates with a chain of slave nodes over a 1-wire bus. Essentially, this project involves designing a system that can send meaningful signals between many parallel nodes and the master node while still keeping all slaves within operating power. The master needs to be able to detect adding and removing nodes, and the system must ensure proper time division between charging and communication and that devices do not "speak" over one another or during charging. AtomWire is intended to be embedded into toy building blocks to create an interactive gaming interface. Our goal for improving the current system is to create an API that developers can use to easily control a 3D game world using these building blocks.
+
+Our first roadblock in understanding the system is the OneWire search algorithm. Much of the existing software is a mimicry of the existing Dallas OneWire chips’, as expected considering AtomWire attempts to mimic the OneWire system on a more capable general-purpose chip. This algorithm is the method that currently allows the master ATmega328P microcontroller to detect slave ATtiny chips connected to the OneWire bus. Understanding how the master and slaves communicate is an integral part to understanding the original project as a whole.
+
+Additionally, understanding the original circuit design has not been easy. Currently we are setting up time to meet with the original AtomWire creators and see the original circuitry for ourselves, but in the meantime we have been making due with hints from the other resources. The schematics in the original’s report shows a simple circuit with the bus going to both an I/O pin to read from and write to the wire and a diode to feed power to a capacitor placed between the VCC pin and ground. The documentation specified a 10uF capacitor was used, which we are using for our circuit for now, but was vague about the type of diode. The original documentation was very vague about the placement of Op-Amp buffers, apparently used for impedance matching with the pins. Realistically, these Op-Amps would also need to be replaced with simpler, more specialized buffers that would function with the available voltage provided instead of an external source.
+
+A previous PCB design has suggested placement of a zener diode instead of a normal diode. Our trials with the two suggest the 5.1V zener diode better prevents backflow from the capacitor when the bus is low and the master is expecting input. While fairly certain our circuit should work, and at the very least provides power to the ATtiny, attempting to run the original software with a single node fails, with no reply from the slave to the master’s search no matter which pin we feed the signal to.
+
+This week our goal is to get a circuit working as the original did and have a PCB design ready by Wednesday night for submission. Once our updated proposal is complete we will post it, which will give a better idea of our vision/endgoals for this project.

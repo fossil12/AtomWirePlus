@@ -44,40 +44,43 @@ void OneWireSlave::setScratchpad(unsigned char scratchpad[9]) {
 }
 
 void OneWireSlave::gpioRead(){
-    uint8_t gpioRvalue = 0x00;
-    uint8_t bitShift = 0x01;
+  uint8_t gpioRvalue = 0x00;
+  uint8_t bitShift = 0x01;
     
-    cli();
-    for(int i=0; i<4; i++){
-          DIRECT_MODE_INPUT(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-          if(DIRECT_READ(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i)))
-           gpioRvalue |= bitShift;
-           else
-           gpioRvalue |= 0x00;
-           bitShift <<= 1;          
-    }
-    sei();
-    scratchpad[2] = gpioRvalue;
+  cli();
+  for(int i=0; i<4; i++){
+    DIRECT_MODE_INPUT(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i));
+    if (DIRECT_READ(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i))) {
+      gpioRvalue |= bitShift;
+    } /*else {
+      gpioRvalue |= 0x00;
+    }*/
+    bitShift <<= 1;          
+  }
+  sei();
+  scratchpad[2] = gpioRvalue;
 }
 
 bool OneWireSlave::gpioWrite(uint8_t gpioWvalue){
     
-    scratchpad[3] = (gpioWvalue & 0x0F);
-    uint8_t wMask = 0x01;
-      
-    cli();
-    for(int i=0; i<4; i++){
-       uint8_t tMask = gpioWvalue & wMask;
-       
-          DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-          if(tMask)
-              DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-          else 
-              DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-          wMask <<= 1;          
+  scratchpad[3] = (gpioWvalue & 0x0F);
+  uint8_t wMask = 0x01;
+    
+  cli();
+  for (int i=0; i<4; i++){
+    uint8_t tMask = gpioWvalue & wMask;
+     
+    DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
+    if (tMask) {
+      DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
+    } else { 
+      DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
     }
-    sei();
-    return TRUE;
+    wMask <<= 1;          
+  }
+  sei();
+
+  return TRUE;
 }
 
 bool OneWireSlave::waitForRequest(bool ignore_errors) {
@@ -85,21 +88,21 @@ bool OneWireSlave::waitForRequest(bool ignore_errors) {
 
   for (;;) {
     //delayMicroseconds(40);
-    //Once reset is done, it waits another 30 micros
-    //Master wait is 65, so we have 35 more to send our presence now that reset is done
-    if (!waitReset(0) ) {
+    // Once reset is done, it waits another 30 micros
+    // Master wait is 65, so we have 35 more to send our presence now that reset is done
+    if (!waitReset(0)) {
       continue;
     }
-    //Reset is complete, tell the master we are prsent
+    // Reset is complete, tell the master we are prsent
     // This will pull the line low for 125 micros (155 micros since the reset) and 
-    //  then wait another 275 plus whatever wait for the line to go high to a max of 480
+    // then wait another 275 plus whatever wait for the line to go high to a max of 480
     // This has been modified from original to wait for the line to go high to a max of 480.
-    if (!presence() ) {
+    if (!presence()) {
       continue;
     }
-    //Now that the master should know we are here, we will get a command from the line
-    //Because of our changes to the presence code, the line should be guranteed to be high
-    if (recvAndProcessCmd() ) {
+    // Now that the master should know we are here, we will get a command from the line
+    // Because of our changes to the presence code, the line should be guranteed to be high
+    if (recvAndProcessCmd()) {
       return TRUE;
     }
     else if ((errno == ONEWIRE_NO_ERROR) || ignore_errors) {
@@ -124,17 +127,20 @@ bool OneWireSlave::recvAndProcessCmd() {
         return FALSE;
       case 0x33: // READ ROM
         sendData(rom, 8);
-        if (errno != ONEWIRE_NO_ERROR)
+        if (errno != ONEWIRE_NO_ERROR) {
           return FALSE;
+        }
         break;
       case 0x55: // MATCH ROM - Choose/Select ROM
         recvData(addr, 8);
-        if (errno != ONEWIRE_NO_ERROR)
+        if (errno != ONEWIRE_NO_ERROR) {
           return FALSE;
+        }
         for (int i=0; i<8; i++){
-          if (rom[i] != addr[i])
+          if (rom[i] != addr[i]) {
             return FALSE;
-            resumeaddr[i] = addr[i];
+          }
+          resumeaddr[i] = addr[i]; // XXX: This leads to incomplete resumeaddr (probably a bool was active would be better)
         }
         duty();
       case 0xCC: // SKIP ROM
@@ -157,8 +163,9 @@ bool OneWireSlave::duty() {
 	uint8_t gpio = 0x80;
 	uint8_t done = recv();
   
-  if((done & 0xF0) == gpio) //CHECK FOR GPIO WRITE COMMAND
+  if((done & 0xF0) == gpio) { //CHECK FOR GPIO WRITE COMMAND
       gpioWrite(done);
+  }
   else if((done & 0xF0) == 0x10){
       scratchpad[0] = 0x11;
       scratchpad[1] = 0x01;
@@ -186,29 +193,29 @@ bool OneWireSlave::duty() {
   }
   else
   {
-	switch (done) {
-		case 0xBE: // READ SCRATCHPAD
-			sendData(scratchpad, 9);
-				if (errno != ONEWIRE_NO_ERROR)
-					return FALSE;
-			break;
-    case 0xA1:  //READ GPIO PINS
-      gpioRead();
-      sendData(scratchpad, 9);
-       if (errno != ONEWIRE_NO_ERROR)
-          return FALSE;
-      break;
-		default:
-			break;
-			if (errno == ONEWIRE_NO_ERROR)
-				break; // skip if no error
-			else
-				return FALSE;
-	return TRUE;
-	}
+  	switch (done) {
+  		case 0xBE: // READ SCRATCHPAD
+  			sendData(scratchpad, 9);
+  				if (errno != ONEWIRE_NO_ERROR)
+  					return FALSE;
+  			break;
+      case 0xA1:  //READ GPIO PINS
+        gpioRead();
+        sendData(scratchpad, 9);
+          if (errno != ONEWIRE_NO_ERROR)
+            return FALSE;
+        break;
+  		default:
+  			if (errno == ONEWIRE_NO_ERROR)
+  				break; // skip if no error
+  			else
+  				return FALSE;
+  	}
+    return TRUE;
   }
 }
 
+// unused
 inline void OneWireSlave::tunedDelay(volatile uint16_t delay) { 
   volatile uint8_t tmp=0;
   asm volatile("sbiw    %0, 0x01 \n\t"
@@ -221,7 +228,8 @@ inline void OneWireSlave::tunedDelay(volatile uint16_t delay) {
     );
 }
 
-void OneWireSlave::customDelay(uint16_t _tx_delay) {
+// unused
+void OneWireSlave::customDelay(uint16_t _tx_delay) { 
   //uint8_t oldSREG = SREG;
   //cli();  // turn off interrupts
   tunedDelay(_tx_delay);
@@ -261,7 +269,7 @@ bool OneWireSlave::waitReset(uint16_t timeout_ms) {
     if (timeout_ms != 0) {
         time_stamp = micros() + timeout_ms*1000;
         while (DIRECT_READ(reg, mask)) {
-            if (micros() > time_stamp) {
+            if (micros() > time_stamp) { // might be true immediately if time_stamp overflows
                 errno = ONEWIRE_WAIT_RESET_TIMEOUT;
                 return FALSE;
             }
@@ -306,49 +314,50 @@ bool OneWireSlave::waitReset() {
 }
 
 bool OneWireSlave::presence(uint8_t delta) {
-    uint8_t mask = pin_bitmask;
-    volatile uint8_t *reg asm("r30") = baseReg;
+  uint8_t mask = pin_bitmask;
+  volatile uint8_t *reg asm("r30") = baseReg;
 
-    //Reset code already waited 30 prior to calling this
-    // Master will not read until 70 recommended, but could read as early as 60
-    // so we should be well enough ahead of that. Arduino waits 65
-    errno = ONEWIRE_NO_ERROR;
-    cli();
-    DIRECT_WRITE_LOW(reg, mask);
-    DIRECT_MODE_OUTPUT(reg, mask);    // drive output low
-    sei();
+  //Reset code already waited 30 prior to calling this
+  // Master will not read until 70 recommended, but could read as early as 60
+  // so we should be well enough ahead of that. Arduino waits 65
+  errno = ONEWIRE_NO_ERROR;
+  cli();
+  DIRECT_WRITE_LOW(reg, mask);
+  DIRECT_MODE_OUTPUT(reg, mask);    // drive output low
+  sei();
 
-    //Delaying for another 125 (orignal was 120) with the line set low is a total of at least 155 micros
-    // total since reset high depends on commands done prior, is technically a little longer
-    delayMicroseconds(125);
-    cli();
-    DIRECT_MODE_INPUT(reg, mask);     // allow it to float
-    sei();
+  //Delaying for another 125 (orignal was 120) with the line set low is a total of at least 155 micros
+  // total since reset high depends on commands done prior, is technically a little longer
+  delayMicroseconds(125);
+  cli();
+  DIRECT_MODE_INPUT(reg, mask);     // allow it to float
+  sei();
 
-    //Default "delta" is 25, so this is 275 in that condition, totaling to 155+275=430 since the reset rise
-    // docs call for a total of 480 possible from start of rise before reset timing is completed
-    //This gives us 50 micros to play with, but being early is probably best for timing on read later
-    //delayMicroseconds(300 - delta);
-    delayMicroseconds(250 - delta);
-    
-    //Modified to wait a while (roughly 50 micros) for the line to go high
-    // since the above wait is about 430 micros, this makes this 480 closer
-    // to the 480 standard spec and the 490 used on the Arduino master code
-    // anything longer then is most likely something going wrong.
-    uint8_t retries = 25;
-    while (!DIRECT_READ(reg, mask));
-    do {
-		if ( retries-- == 0)
-			return FALSE;
-		delayMicroseconds(2); 
-    } while(!DIRECT_READ(reg, mask));
-    /*
-    if ( !DIRECT_READ(reg, mask)) {
-        errno = ONEWIRE_PRESENCE_LOW_ON_LINE;
-        return FALSE;
-    } else
-        return TRUE;
-    */
+  //Default "delta" is 25, so this is 275 in that condition, totaling to 155+275=430 since the reset rise
+  // docs call for a total of 480 possible from start of rise before reset timing is completed
+  //This gives us 50 micros to play with, but being early is probably best for timing on read later
+  //delayMicroseconds(300 - delta);
+  delayMicroseconds(250 - delta);
+  
+  // Modified to wait a while (roughly 50 micros) for the line to go high
+  // since the above wait is about 430 micros, this makes this 480 closer
+  // to the 480 standard spec and the 490 used on the Arduino master code
+  // anything longer then is most likely something going wrong.
+  uint8_t retries = 25;
+  while (!DIRECT_READ(reg, mask));
+  do {
+	  if ( retries-- == 0) {
+		  return FALSE;
+    }
+	  delayMicroseconds(2); 
+  } while(!DIRECT_READ(reg, mask));
+  /*
+  if ( !DIRECT_READ(reg, mask)) {
+      errno = ONEWIRE_PRESENCE_LOW_ON_LINE;
+      return FALSE;
+  } else
+      return TRUE;
+  */
 }
 bool OneWireSlave::presence() {
   return presence(25);

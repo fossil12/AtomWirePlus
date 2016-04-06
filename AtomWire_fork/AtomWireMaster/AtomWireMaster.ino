@@ -51,7 +51,7 @@ void loop(void) {
       awm.write(0x8E);
     }
   } else {
-    awm.write(0x43); // ??
+    awm.write(0x43); // Set block size to 2x2 and block/node id to 3
     //awm.depower();
   }
   
@@ -67,13 +67,13 @@ void loop(void) {
   if(addr[1] == 0xA1) {
     awm.write(0xA1); // read gpio pins
   } else {
-    awm.write(0xBE); // ??
+    awm.write(0xBE); // read scratchpad (without updating gpio pins
   }
 
   Serial.print("\nP = ");
-  Serial.print(present,HEX);
+  Serial.print(present, HEX);
   Serial.print(" ");
-  for ( i = 0; i < 9; i++) {           // we need 9 bytes
+  for (i = 0; i < 9; i++) {           // we need 9 bytes
     data[i] = awm.read();
     Serial.print(data[i], HEX);
     Serial.print(" ");

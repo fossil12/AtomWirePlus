@@ -44,9 +44,9 @@ class OneWireSlave {
     char rom[8];
     char scratchpad[9];
     char resumeaddr[8];
-    void customDelay(uint16_t b);
+    void customDelay(uint16_t b); // unsued
     // private static method for timing
-    static inline void tunedDelay(volatile uint16_t delay);
+    static inline void tunedDelay(volatile uint16_t delay); // unsued
   public:
     OneWireSlave(uint8_t pin);
     void init(unsigned char rom[8]);

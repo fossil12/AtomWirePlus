@@ -45,7 +45,7 @@ void loop(void) {
       //awm.write(0x21);
     } else if (c % 4 == 1) {
       awm.write(0x8C);
-    } else if( c % 4 == 2) {
+    } else if (c % 4 == 2) {
       awm.write(0x86);
     } else {
       awm.write(0x8E);
@@ -67,7 +67,7 @@ void loop(void) {
   if(addr[1] == 0xA1) {
     awm.write(0xA1); // read gpio pins
   } else {
-    awm.write(0xBE); // read scratchpad (without updating gpio pins
+    awm.write(0xBE); // read scratchpad (without updating gpio pins)
   }
 
   Serial.print("\nP = ");

@@ -93,7 +93,7 @@ bool OneWireSlave::waitForRequest(bool ignore_errors) {
     if (!waitReset(0)) {
       continue;
     }
-    // Reset is complete, tell the master we are prsent
+    // Reset is complete, tell the master we are present
     // This will pull the line low for 125 micros (155 micros since the reset) and 
     // then wait another 275 plus whatever wait for the line to go high to a max of 480
     // This has been modified from original to wait for the line to go high to a max of 480.

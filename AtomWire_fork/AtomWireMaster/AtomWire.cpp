@@ -24,6 +24,7 @@ uint8_t OneWire::reset(void)
 	uint8_t r;
 	uint8_t retries = 125;
 
+  //Serial.print("Start reset...\n");
 	noInterrupts();
 	DIRECT_MODE_INPUT(reg, mask);
 	interrupts();
@@ -265,6 +266,7 @@ uint8_t OneWire::search(uint8_t *newAddr)
       return FALSE;
     }
 
+    //Serial.print("Issue search command\n");
     // issue the search command
     write(0xF0);
 

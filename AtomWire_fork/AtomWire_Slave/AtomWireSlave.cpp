@@ -76,7 +76,7 @@ bool OneWireSlave::gpioWrite(uint8_t gpioWvalue){
     } else { 
       DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
     }
-    wMask <<= 1;          
+    wMask <<= 1;         
   }
   sei();
 
@@ -256,58 +256,58 @@ bool OneWireSlave::search() {
 }
 
 bool OneWireSlave::waitReset(uint16_t timeout_ms) {
-    uint8_t mask = pin_bitmask;
-    volatile uint8_t *reg asm("r30") = baseReg;
-    unsigned long time_stamp;
+  uint8_t mask = pin_bitmask;
+  volatile uint8_t *reg asm("r30") = baseReg;
+  unsigned long time_stamp;
 
-    errno = ONEWIRE_NO_ERROR;
-    cli();
-    DIRECT_MODE_INPUT(reg, mask);
-    sei();
+  errno = ONEWIRE_NO_ERROR;
+  cli();
+  DIRECT_MODE_INPUT(reg, mask);
+  sei();
 
-    //Wait for the line to fall
-    if (timeout_ms != 0) {
-        time_stamp = micros() + timeout_ms*1000;
-        while (DIRECT_READ(reg, mask)) {
-            if (micros() > time_stamp) { // might be true immediately if time_stamp overflows
-                errno = ONEWIRE_WAIT_RESET_TIMEOUT;
-                return FALSE;
-            }
-        }
-    } else {
-      //Will wait forever for the line to fall
-      while (DIRECT_READ(reg, mask)) {};
-    }
-    
-    //Set to wait for rise up to 540 micros
-    //Master code sets the line low for 500 micros
-    //TODO The actual documented max is 640, not 540
-    time_stamp = micros() + 540;
-    
-    //Wait for the rise on the line up to 540 micros
-    while (DIRECT_READ(reg, mask) == 0) {
-        if (micros() > time_stamp) {
-            errno = ONEWIRE_VERY_LONG_RESET;
-            return FALSE;
-        }
-    }
-    
-    //If the master pulled low for exactly 500, then this will be 40 wait time
-    // Recommended for master is 480, which would be 60 here then
-    // Max is 640, which makes this negative, but it returns above as a "ONEWIRE_VERY_LONG_RESET"
-    // this gives an extra 10 to 30 micros befor calling the reset invalid
-    if ((time_stamp - micros()) > 70) {
-        errno = ONEWIRE_VERY_SHORT_RESET;
+  // Wait for the line to fall
+  if (timeout_ms != 0) {
+    time_stamp = micros() + timeout_ms*1000;
+    while (DIRECT_READ(reg, mask)) {
+      if (micros() > time_stamp) { // might be true immediately if time_stamp overflows
+        errno = ONEWIRE_WAIT_RESET_TIMEOUT;
         return FALSE;
+      }
     }
-    
-    //Master will now delay for 65 to 70 recommended or max of 75 before it's "presence" check
-    // and then read the pin value (checking for a presence on the line)
-    // then wait another 490 (so, 500 + 64 + 490 = 1054 total without consideration of actual op time) on Arduino, 
-    // but recommended is 410 with total reset length of 480 + 70 + 410 (or 480x2=960)
-    delayMicroseconds(30);
-    //Master wait is 65, so we have 35 more to send our presence now that reset is done
-    return TRUE;
+  } else {
+    // Will wait forever for the line to fall
+    while (DIRECT_READ(reg, mask)) {};
+  }
+  
+  // Set to wait for rise up to 540 micros
+  // Master code sets the line low for 500 micros
+  // TODO The actual documented max is 640, not 540
+  time_stamp = micros() + 540;
+  
+  // Wait for the rise on the line up to 540 micros
+  while (DIRECT_READ(reg, mask) == 0) {
+    if (micros() > time_stamp) {
+      errno = ONEWIRE_VERY_LONG_RESET;
+      return FALSE;
+    }
+  }
+  
+  // If the master pulled low for exactly 500, then this will be 40 wait time
+  // Recommended for master is 480, which would be 60 here then
+  // Max is 640, which makes this negative, but it returns above as a "ONEWIRE_VERY_LONG_RESET"
+  // this gives an extra 10 to 30 micros befor calling the reset invalid
+  if ((time_stamp - micros()) > 70) {
+    errno = ONEWIRE_VERY_SHORT_RESET;
+    return FALSE;
+  }
+  
+  // Master will now delay for 65 to 70 recommended or max of 75 before it's "presence" check
+  // and then read the pin value (checking for a presence on the line)
+  // then wait another 490 (so, 500 + 64 + 490 = 1054 total without consideration of actual op time) on Arduino, 
+  // but recommended is 410 with total reset length of 480 + 70 + 410 (or 480x2=960)
+  delayMicroseconds(30);
+  //Master wait is 65, so we have 35 more to send our presence now that reset is done
+  return TRUE;
 }
 bool OneWireSlave::waitReset() {
   return waitReset(1000);
@@ -317,7 +317,7 @@ bool OneWireSlave::presence(uint8_t delta) {
   uint8_t mask = pin_bitmask;
   volatile uint8_t *reg asm("r30") = baseReg;
 
-  //Reset code already waited 30 prior to calling this
+  // Reset code already waited 30 prior to calling this
   // Master will not read until 70 recommended, but could read as early as 60
   // so we should be well enough ahead of that. Arduino waits 65
   errno = ONEWIRE_NO_ERROR;
@@ -326,14 +326,14 @@ bool OneWireSlave::presence(uint8_t delta) {
   DIRECT_MODE_OUTPUT(reg, mask);    // drive output low
   sei();
 
-  //Delaying for another 125 (orignal was 120) with the line set low is a total of at least 155 micros
+  // Delaying for another 125 (orignal was 120) with the line set low is a total of at least 155 micros
   // total since reset high depends on commands done prior, is technically a little longer
   delayMicroseconds(125);
   cli();
   DIRECT_MODE_INPUT(reg, mask);     // allow it to float
   sei();
 
-  //Default "delta" is 25, so this is 275 in that condition, totaling to 155+275=430 since the reset rise
+  // Default "delta" is 25, so this is 275 in that condition, totaling to 155+275=430 since the reset rise
   // docs call for a total of 480 possible from start of rise before reset timing is completed
   //This gives us 50 micros to play with, but being early is probably best for timing on read later
   //delayMicroseconds(300 - delta);
@@ -411,7 +411,7 @@ void OneWireSlave::sendBit(uint8_t v) {
     DIRECT_MODE_INPUT(reg, mask);
     //waitTimeSlot waits for a low to high transition followed by a high to low within the time-out
     uint8_t wt = waitTimeSlot();
-    if (wt != 1 ) { //1 is success, others are failure
+    if (wt != 1) { // 1 is success, others are failure
       if (wt == 10) {
         errno = ONEWIRE_READ_TIMESLOT_TIMEOUT_LOW;
       } else {
@@ -420,9 +420,9 @@ void OneWireSlave::sendBit(uint8_t v) {
       sei();
       return;
     }
-    if (v & 1)
+    if (v & 1) {
         delayMicroseconds(30);
-    else {
+    } else {
         cli();
         DIRECT_WRITE_LOW(reg, mask);
         DIRECT_MODE_OUTPUT(reg, mask);
@@ -493,7 +493,7 @@ uint8_t OneWireSlave::waitTimeSlotRead() {
     //If the line is already high, this is basically skipped
     retries = TIMESLOT_WAIT_RETRY_COUNT;
     //While line is low, retry
-    while ( !DIRECT_READ(reg, mask))
+    while (!DIRECT_READ(reg, mask))
         if (--retries == 0)
             return 10;
             

@@ -70,6 +70,46 @@ This is described from the perspective of the slave and means the master is send
 
 First the slave waits until the start of the next sequence. This done by waiting up to `t_W1RMAX` until the line becomes hight and then waiting up to `t_W0RMAX` until it it driven low by the master. Now it waits `t_SLR` until it reads the line.
 
-## Selection commands
+## Selection and search commands
+
+### Match ROM `0x55`
+
+This command is immediatly followed by an AtomWire ID to defines a slave in the network. Thus it selects a specific slaves. If two slaves have the same ID data collision occures. Other slaves on the network stop communication until the next reset pulse is detected.
+
+### Skip ROM `0xCC`
+
+This skips the ROM selection (Match ROM) and is useful if there's only one slave on the network. Otherwise data collition will occure.
+
+### Resume `0x69`
+
+Selects the last AtomWire device that was successfully selected via a Match ROM or Skip ROM command.
+
+### Search ROM `0xF0`
+
+This initates a search. See Search section for an description of how it works.
+
+### Read ROM `0x33` (deprecated)
+
+Requests the serial device of a slave. If multiple slaves are on the network, data collision will occur and the data received will not be valid.
+
 ## Get and set commands
+
+### GPIO write `0x8X`
+
+This set the GPIO pins (0 - 3) to the lower 4 bits of the command (`X`). The bits are assigned form the lowest to the highest bit to pin 0 - 3 respectively. (i.e. pin 0 = bit 0, bit 1 = bit 1, ...)
+
+### Set block type `0x1X` `0x2X` `0x4X`
+
+This sets the block size to 1x1, 1x2 and 2x2 respectively. The lower 4 bits define the ID of the node inside this block. It is between 0 and maxBlockSize - 1, where maxBlockSize is 1, 2 and 4 respectively.
+
+### Read scratchpad `0xBE`
+
+Returns the contents of the scratchpad wihout updating (reading) the current GPIO pin values.
+
+### Read GPIO poins `0xA1`
+
+Returns the contents of the scratchpad with updated (read) GPIO values.
+
 ## Search
+
+An explanation of the current 1-Wire search algorithm used can be found [here](https://www.maximintegrated.com/en/app-notes/index.mvp/id/187).

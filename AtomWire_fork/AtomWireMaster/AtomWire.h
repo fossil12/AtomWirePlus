@@ -25,6 +25,12 @@
 #define ONEWIRE_SEARCH 1
 #endif
 
+// you can exclude onewire search all order by defining that to 0
+// this only works when ONEWIRE_SEARCH is also enabled
+#ifndef ATOMWIRE_SEARCH_ALL_ORDERED
+#define ATOMWIRE_SEARCH_ALL_ORDERED 1
+#endif
+
 // You can exclude CRC checks altogether by defining this to 0
 #ifndef ONEWIRE_CRC
 #define ONEWIRE_CRC 1
@@ -65,6 +71,12 @@
 #error "Please define I/O register types here"
 #endif
 
+#if ATOMWIRE_SEARCH_ALL_ORDERED
+// This defines the maximun number of slaves that are supported on AtomWire+
+// when we search for all the slaves on the line
+#define ATOMWIRE_MAX_SLAVES 10
+#endif
+
 
 class OneWire
 {
@@ -78,6 +90,24 @@ class OneWire
     uint8_t LastDiscrepancy;
     uint8_t LastFamilyDiscrepancy;
     uint8_t LastDeviceFlag;
+
+#if ATOMWIRE_SEARCH_ALL_ORDERED
+    // local variables
+    uint8_t AllAddresses[MAX_SLAVES];
+    uint8_t NumOfAddressesFound;
+
+    // Save the current search state
+    void save_search_state();
+    // Reset the search state to the state saved at the last call of
+    // `save_search_state()`
+    void reset_search_state();
+
+    // Used by the two methods above
+    unsigned char SAVED_ROM_NO[8];
+    uint8_t SavedLastDiscrepancy;
+    uint8_t SavedLastFamilyDiscrepancy;
+    uint8_t SavedLastDeviceFlag;
+#endif
 #endif
 
   public:
@@ -139,6 +169,36 @@ class OneWire
     // get garbage.  The order is deterministic. You will always get
     // the same devices in the same order.
     uint8_t search(uint8_t *newAddr);
+
+#if ATOMWIRE_SEARCH_ALL_ORDERED
+    /**
+     * Clear the search all ordered status. You have to remove all expect the
+     * first slaves on the node to initiate a new successful
+     * `search_all_ordered()`.
+     */
+    void reset_search_all_ordered();
+
+    /**
+     * This searches for all slave's addresses on the line and returns them in 
+     * order they were added to the line. This only works if this method is 
+     * called after every addition of a new slave and before adding the next one. 
+     * Thus the `addrs` array contains all addresses on the line in order from 
+     * the slave closest to the master to the slave most far away.
+     *
+     * If more than one slave is found since the last call it will return -2 and
+     * reset it's state. All nodes except of the first one need to be removed
+     * to reset this error
+     *
+     * \note For now we support up to `ATOMWIRE_MAX_SLAVES` slaves
+     *
+     * \param addrs Array of addresses on line order by distance form the master
+     *
+     * \return Number of addresses found on line, -1 if an error occured, -2 if
+     *          more than one slave was added since the last call
+     */
+    uint8_t search_all_ordered(uint8_t **addrs);
+
+#endif
 #endif
 
 #if ONEWIRE_CRC

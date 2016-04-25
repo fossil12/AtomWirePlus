@@ -355,6 +355,77 @@ uint8_t OneWire::search(uint8_t *newAddr)
   return search_result;
 }
 
+#if ATOMWIRE_SEARCH_ALL_ORDERED
+
+void OneWire::reset_search_all_ordered()
+{
+  NumOfAddressesFound = 0;
+  // Do we want to zero out all the addresses? I don't think so because
+  // we don't access it if no addresses are found and override it if there is
+  // a new address found
+}
+
+// What happens if we remove one or more?
+uint8_t OneWire::search_all_ordered(uint8_t **addrs)
+{
+  save_search_state();
+
+  // number of found addresses
+  uint8_t foundAddrs = 0;
+  // number of new addresses
+  uint8_t newAddrs = 0;
+  // array storing which addresses in the address array where found
+  
+
+  // new address
+
+  // Add new address if number of 
+  //    new addresses is = 1 && number of found addresses = NumOfAddressesFound
+  // Do nothing but end successful if number of new addresses = 0 
+  //    and NumOfAddressesFound = number of found addresses (different vars)
+  // Error if number of new addresse > 1
+  // Set NumOfAddressesFound to number of found addresses if
+  //    NumOfAddressesFound > number of found addresses and
+  //    consecutive ones in bitmap starting at 1st position = 
+  //      number of found addresses
+  // Otherwise error
+
+
+  // Find all existing addresses and maybe a new one
+  for (int i = 0; i < NumOfAddressesFound + 1; i++) {
+
+  }
+
+
+
+  reset_search_state();
+}
+
+// Private method
+void OneWire::save_search_state()
+{
+  for (int i = 0; i < 8; ++i) {
+    SAVED_ROM_NO[i] = ROM_NO[i];
+  }
+  SavedLastDiscrepancy = LastDiscrepancy;
+  SavedLastFamilyDiscrepancy = LastFamilyDiscrepancy;
+  SavedLastDeviceFlag = LastDeviceFlag;
+
+  reset_search(); // for convenience also reset the values to start a new search 
+}
+
+// Private method
+void OneWire::reset_search_state()
+{
+  for (int i = 0; i < 8; ++i) {
+    ROM_NO[i] = SAVED_ROM_NO[i];
+  }
+  LastDiscrepancy = SavedLastDiscrepancy;
+  LastFamilyDiscrepancy = SavedLastFamilyDiscrepancy;
+  LastDeviceFlag = SavedLastDeviceFlag;
+}
+
+#endif
 #endif
 
 #if ONEWIRE_CRC

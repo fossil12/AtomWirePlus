@@ -1,5 +1,7 @@
 # AtomWire+ TDMA
 
+_Work in progress..._
+
 - How do we handle adding and deleting of nodes after/during a new search?
 - Where who gets the next transmission spot?
 - How long does a search take?
@@ -47,9 +49,9 @@ _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](h
 
 - 64 bits (8 bytes): 7 bytes content + 1 byte crc
 
-	msb                                 lsb
-	0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
-	cmd  |----------content----------|  crc
+		msb                                 lsb
+		0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
+		cmd  |----------content----------|  crc
 
 - cmd: commands
 	- 0xxx: do x

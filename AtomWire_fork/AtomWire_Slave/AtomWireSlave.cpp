@@ -160,6 +160,7 @@ bool OneWireSlave::recvAndProcessCmd() {
         }
         duty();
       case 0xCC: // SKIP ROM
+        // XXX: Not implemented
         return TRUE;
       case 0x69: // RESUME ROM
         recvData(resumeaddr, 8);

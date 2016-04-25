@@ -1,6 +1,6 @@
-# AtomeWire+ Specification
+# AtomeWire Specification
 
-_This document intends to describe the AtomeWire+ protocol based on the AtomWire and 1-Wire protocol (described in the datasheet of the DS2413 found [here](https://datasheets.maximintegrated.com/en/ds/DS2413.pdf))._
+_This document intends to describe the AtomeWire protocol based on the 1-Wire protocol (described in the datasheet of the DS2413 found [here](https://datasheets.maximintegrated.com/en/ds/DS2413.pdf))._
 
 ## Overview
 

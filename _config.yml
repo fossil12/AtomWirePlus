@@ -7,7 +7,7 @@ tagline:             'ESE 350 project'
 description:         'Reports of your ESE 350 project.'
 url:                 'http://fossil12.github.io' # the base hostname & protocol for your site
 baseurl:             '/AtomWirePlus' # the subpath of your site, e.g. /blog
-paginate:            3
+paginate:            10
 
 # About/contact
 author:

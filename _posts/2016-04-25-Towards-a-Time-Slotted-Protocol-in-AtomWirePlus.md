@@ -18,22 +18,22 @@ There exists two time slots: the search time slot and the message time slot. Eve
 
 #### Search Time Slot
 
-If follower(s) show up the leader starts an search[^sends command `0xF0`] to find all the followers and their addresses. The search is the same as in the 1-Wire protocol and described [here](https://www.maximintegrated.com/en/app-notes/index.mvp/id/187). Every search iteration will take 14400µs (14.4ms). If a follower is excluded until the next iteration it can do other calculations or go in a low power mode until the next time slot expires. The search is finished when all followers on the wire are detected and followed by at least one message time slot.
+If follower(s) show up the leader starts an search (sends command `0xF0`) to find all the followers and their addresses. The search is the same as in the 1-Wire protocol and described [here](https://www.maximintegrated.com/en/app-notes/index.mvp/id/187). Every search iteration will take 14400µs (14.4ms). If a follower is excluded until the next iteration it can do other calculations or go in a low power mode until the next time slot expires. The search is finished when all followers on the wire are detected and followed by at least one message time slot.
 
 The search is repeated in a specific interval to detect added or removed followers.
 
 #### Message Time Slot
 
-This time slot is used to exchange messages between the leader and one follower. After the reset/presence pulse the leader selects a follower[^`0x55` followed by the AtomWire ID of the follower] and then does two message exchanges. First it sends a command (1 byte) followed by a message (8 bytes) to the follower and the it issues another command (1 byte) indicating to the follower that it can reply with a message (2 bytes). This concludes a message times slot and takes 16080µs (16.08ms). In the next iteration the leader selects another follower on a fair ordering basis. Followers that don’t take part in the existing time slot can do other calculation or go to sleep after the selection command and check again after the time slot is expired.
+This time slot is used to exchange messages between the leader and one follower. After the reset/presence pulse the leader selects a follower (`0x55` followed by the AtomWire ID of the follower) and then does two message exchanges. First it sends a command (1 byte) followed by a message (8 bytes) to the follower and the it issues another command (1 byte) indicating to the follower that it can reply with a message (2 bytes). This concludes a message times slot and takes 16080µs (16.08ms). In the next iteration the leader selects another follower on a fair ordering basis. Followers that don’t take part in the existing time slot can do other calculation or go to sleep after the selection command and check again after the time slot is expired.
 
 ### Messages
 
 The transmitted messages are 8 bytes (64 bits) long and can theoretically contain arbitrary information. To make parsing and error detection of messages possible we introduce the following message format.
 
-	msb   7    6    5    4    3    2    1    0    lsb
-	     0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
-	     cmd-|-----------content-----------|-crc
+	msb 7    6    5    4    3    2    1    0    lsb
+	    0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
+	    cmd-|-----------content-----------|-crc
 
 For error detection the last byte (least significant byte) is a CRC-8 check value (like in the 1-Wire protocol). The most significant byte encodes the command indicating to the receiver how to parse the content of the message.
 
-_This specification is a "work in progress". The most recent specification can be found [here.](https://github.com/fossil12/AtomWirePlus/blob/master/AtomWirePlus_spec.md)_
+_This specification is a "work in progress". The most recent specification can be found [here](https://github.com/fossil12/AtomWirePlus/blob/master/AtomWirePlus_spec.md)._

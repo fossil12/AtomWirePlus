@@ -61,19 +61,3 @@ _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](h
 ## ATtiny85
 
 8 MHz = 8 clock cycles per µs
-
-# From a message specific protocol to a time-slotted protocol
-
-
-
-## Time slots
-
-Every iteration of the protocol starts with the reset pulse by the leader following a presence pulse of the followers. If no presence pulse is received by the leader, he will continue to check for followers (every xx ms) with the reset/presence pulse sequences until a follower shows up.
-
-If follower(s) show up after the
-
-
-## States
-
-### Search
-### Time slot

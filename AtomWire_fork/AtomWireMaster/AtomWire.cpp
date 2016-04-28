@@ -167,6 +167,24 @@ void OneWire::select(const uint8_t rom[8])
     for (i = 0; i < 8; i++) write(rom[i]);
 }
 
+void OneWire::sendMsg(const uint8_t msg[8])
+{
+    uint8_t i;
+
+    write(0x70);           // Send msg
+
+    for (i = 0; i < 8; i++) write(msg[i]);
+}
+
+void OneWire::receiveMsg(uint8_t msg[8])
+{
+    uint8_t i;
+
+    write(0x71);           // Receiv msg
+
+    for (i = 0; i < 8; i++) msg[i] = read();
+}
+
 //
 // Do a ROM skip
 //

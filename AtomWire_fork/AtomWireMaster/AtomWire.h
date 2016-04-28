@@ -81,7 +81,7 @@ class OneWire
 #endif
 
   public:
-    OneWire( uint8_t pin);
+    OneWire(uint8_t pin);
 
     // Perform a 1-Wire reset cycle. Returns 1 if a device responds
     // with a presence pulse.  Returns 0 if there is no device or the
@@ -90,6 +90,9 @@ class OneWire
 
     // Issue a 1-Wire rom select command, you do the reset first.
     void select(const uint8_t rom[8]);
+
+    void sendMsg(const uint8_t msg[8]);
+    void receiveMsg(uint8_t msg[8]);
 
     // Issue a 1-Wire rom skip command, to address all on bus.
     void skip(void);

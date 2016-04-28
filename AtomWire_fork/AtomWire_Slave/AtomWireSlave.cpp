@@ -89,15 +89,15 @@ bool OneWireSlave::waitForRequest(bool ignore_errors) {
   for (;;) {
     // DEBUG
     // Write low to pin 0 - 2
-    for (int i = 0; i < 3; i++) {
-      DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-      DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-    }
+    // for (int i = 0; i < 3; i++) {
+    //   DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
+    //   DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
+    // }
 
     //delayMicroseconds(40);
     // Once reset is done, it waits another 30 micros
     // Master wait is 65, so we have 35 more to send our presence now that reset is done
-    DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(0)),digitalPinToBitMask(0));
+    //DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(0)),digitalPinToBitMask(0));
     if (!waitReset(0)) {
       continue;
     }
@@ -107,8 +107,8 @@ bool OneWireSlave::waitForRequest(bool ignore_errors) {
     // This has been modified from original to wait for the line to go high to a max of 480.
 
     // DEBUG
-    DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
-    DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(0)),digitalPinToBitMask(0));
+    //DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
+    //DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(0)),digitalPinToBitMask(0));
     if (!presence()) {
       continue;
     }
@@ -116,8 +116,8 @@ bool OneWireSlave::waitForRequest(bool ignore_errors) {
     // Because of our changes to the presence code, the line should be guranteed to be high
 
     // DEBUG
-    DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(2)),digitalPinToBitMask(2));
-    DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
+    //DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(2)),digitalPinToBitMask(2));
+    //DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
     if (recvAndProcessCmd()) {
       return TRUE;
     }
@@ -179,57 +179,73 @@ bool OneWireSlave::recvAndProcessCmd() {
 bool OneWireSlave::duty() {
 	uint8_t gpio = 0x80;
 	uint8_t done = recv();
+  char msg_in[8];
+  char msg_out[8];
+
+  if (done == 0x70) {
+    recvData(msg_in, 8);
+
+    done = recv();
+
+    if (done == 0x71) {
+      msg_in[7]++;
+      DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
+      DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
+      sendData(msg_in, 8);
+      DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
+    }
+  }
   
-  if((done & 0xF0) == gpio) { //CHECK FOR GPIO WRITE COMMAND
-      gpioWrite(done);
-  }
-  else if((done & 0xF0) == 0x10){
-      scratchpad[0] = 0x11;
-      scratchpad[1] = 0x01;
-      return TRUE;
-  }
-  else if((done & 0xF0) == 0x20){
-    scratchpad[0] = 0x12;
-      if((done & 0x0F) == 0x01)
-          scratchpad[1] = 0x01;
-      else 
-          scratchpad[1] = 0x02;
-      return TRUE;
-  }
-  else if((done & 0xF0) == 0x40){
-    scratchpad[0] = 0x22;
-       if((done & 0x03) == 0x03)
-          scratchpad[1] = 0x03;
-       else if((done & 0x02) == 0x02)
-          scratchpad[1] = 0x02;
-       else if((done & 0x01) == 0x01)
-          scratchpad[1] = 0x01;
-       else
-          scratchpad[1] = 0x04;
-       return TRUE;
-  }
-  else
-  {
-  	switch (done) {
-  		case 0xBE: // READ SCRATCHPAD
-  			sendData(scratchpad, 9);
-  				if (errno != ONEWIRE_NO_ERROR)
-  					return FALSE;
-  			break;
-      case 0xA1:  //READ GPIO PINS
-        gpioRead();
-        sendData(scratchpad, 9);
-          if (errno != ONEWIRE_NO_ERROR)
-            return FALSE;
-        break;
-  		default:
-  			if (errno == ONEWIRE_NO_ERROR)
-  				break; // skip if no error
-  			else
-  				return FALSE;
-  	}
-    return TRUE;
-  }
+  // if((done & 0xF0) == gpio) { //CHECK FOR GPIO WRITE COMMAND
+  //     gpioWrite(done);
+  // }
+  // else if((done & 0xF0) == 0x10){
+  //     scratchpad[0] = 0x11;
+  //     scratchpad[1] = 0x01;
+  //     return TRUE;
+  // }
+  // else if((done & 0xF0) == 0x20){
+  //   scratchpad[0] = 0x12;
+  //     if((done & 0x0F) == 0x01)
+  //         scratchpad[1] = 0x01;
+  //     else 
+  //         scratchpad[1] = 0x02;
+  //     return TRUE;
+  // }
+  // else if((done & 0xF0) == 0x40){
+  //   scratchpad[0] = 0x22;
+  //      if((done & 0x03) == 0x03)
+  //         scratchpad[1] = 0x03;
+  //      else if((done & 0x02) == 0x02)
+  //         scratchpad[1] = 0x02;
+  //      else if((done & 0x01) == 0x01)
+  //         scratchpad[1] = 0x01;
+  //      else
+  //         scratchpad[1] = 0x04;
+  //      return TRUE;
+  // }
+  // else
+  // {
+  // 	switch (done) {
+  // 		case 0xBE: // READ SCRATCHPAD
+  // 			sendData(scratchpad, 9);
+  // 				if (errno != ONEWIRE_NO_ERROR)
+  // 					return FALSE;
+  // 			break;
+  //     case 0xA1:  //READ GPIO PINS
+  //       gpioRead();
+  //       sendData(scratchpad, 9);
+  //         if (errno != ONEWIRE_NO_ERROR)
+  //           return FALSE;
+  //       break;
+  // 		default:
+  // 			if (errno == ONEWIRE_NO_ERROR)
+  // 				break; // skip if no error
+  // 			else
+  // 				return FALSE;
+  // 	}
+  //   return TRUE;
+  // }
 }
 
 // unused

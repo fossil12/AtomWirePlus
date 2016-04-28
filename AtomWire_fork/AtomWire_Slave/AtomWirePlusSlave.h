@@ -5,7 +5,9 @@
 
 class AtomWirePlusSlave : public OneWireSlave
 {
+  private:
 
+  public:
 };
 
 #endif // ATOMWIREPLUSSLAVE_H

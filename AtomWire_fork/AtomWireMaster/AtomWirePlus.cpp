@@ -40,6 +40,7 @@ uint8_t AtomWirePlus::send_msg_p(uint8_t msg[64])
   }
 
   frame[12] = this->crc8(msg, 8);
+
   return TRUE;
 }
 
@@ -125,22 +126,57 @@ uint8_t AtomWirePlus::run(void)
 //   return this->search(addr);
 // }
 
-uint8_t AtomWirePlus::send_msg(uint8_t *addr, uint8_t *msg)
+// Returns postion of `addr` in `addrs` array or -1 when not found
+int8_t AtomWirePlus::get_pos_of_node(uint8_t addr[64])
 {
+  int i, j
+  uint8_t addr_ref[64];
+
+  // Because the array is (on purpose) not sorted there is no faster way than O(n).
+  for (i = 0; i < num_nodes; i++) {
+    addr_ref = addrs[i];
+
+    for (j = 0; j < 8; j++) {
+      if (addr[j] != addr_ref[j]) {
+        break;
+      }
+    }
+
+    if (j == 8) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+uint8_t AtomWirePlus::send_msg(uint8_t addr[AWP_ADDR_LENGTH], uint8_t *msg)
+{
+  int8_t is_not_broadcast, iterator;
   // Broadcast if *addr = 0x0000 0000 0000 0000
+  for (is_not_broadcast = AWP_ADDR_LENGTH; is_not_broadcast > 0; is_not_broadcast--) {
+    if (addr[is_not_broadcast] != 0x00) {
+      break;
+    }
+  }
 
-  // queue message if not
+  if (is_not_broadcast) {
+    // queue message
+    int8_t pos = get_pos_of_node(addr);
+    if (pos == -1) {
+      return FALSE;
+    }
 
-  // if (addr != NULL) {
-  //   sender_addr = addr;
-  //   sender_msg = msg;
+    out_msg_queue[pos] = msg; // not a good idea: When does this data get freed?
+  } else {
+    // queue message for everyone
+    for (iterator = 0; iterator < num_nodes; iterator++) {
+      out_msg_queue[iterator] = msg; // probably not a good idea (who frees the pointer?)
+    }
+  }
 
-  //   return TRUE;
-  // } else {
-  //   return FALSE;
-  // }
-
-  return FALSE;
+  return TRUE;
 }
 
 uint8_t AtomWirePlus::recv_msg(uint8_t *addr, uint8_t *msg)

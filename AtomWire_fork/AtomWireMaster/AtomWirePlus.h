@@ -6,6 +6,7 @@
 #define REDUE_SEARCH_INTERVAL 4
 #define MAX_BLOCKS_ON_LINE 10
 #define FRAME_BYTE_LENGTH 13
+#define AWP_ADDR_LENGTH 64
 
 class AtomWirePlus : public OneWire
 {

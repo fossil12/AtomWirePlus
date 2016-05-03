@@ -7,6 +7,7 @@ _Work in progress..._
 - How long does a search take?
 - What is the minimum delay for from adding one block to adding the next block? (i.e. how often do we need to search for new nodes?)
 - What happens when a node is removed before or during communication with it?
+- Reliable link layer with acks?
 
 ## Timings and sizes
 
@@ -19,7 +20,7 @@ _Work in progress..._
 	
 _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](https://docs.google.com/spreadsheets/d/1yPVSfb1niXWbVkhceOln84PVQOyeUlXaM6V_9AKL58c/edit?usp=sharing) for all timing values._
 
-### Protocol timings & sizes
+### Protocol timings & sizes (64 bit messages)
 
 - Message size: 64 bits (8 bytes)
 	7 bytes content & 1 byte crc
@@ -45,6 +46,27 @@ _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](h
 	2 * 8 bit command + 2 * send/receive message
 	2 * (5040µs) = 10080µs = 10.08ms
 
+### Protocol timings & sizes (100 bit messages)
+
+- Message size: 100 bits
+	see below for details
+
+- Time for sending a message (100 bits):
+	100 * t_1B = 7000µs = 7ms
+
+- Min time of a time slot: 
+	reset/presence pulse + select follower + 
+	send message + receive message
+	960µs + 5040µs + 2 * (7000µs) = 20000 = 20ms
+
+- Search time per node one line:
+	reset/presence pulse + sending & receiving 3 * 64 bits
+	960µs + 3 * (4480µs) = 14400µs = 14.4ms
+
+- Min time a slave has after it is not selected until the next time slot: 
+	2 * send/receive message
+	2 * (7000µs) = 14000µs = 14ms
+
 ## Message format
 
 - 64 bits (8 bytes): 7 bytes content + 1 byte crc
@@ -53,8 +75,34 @@ _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](h
 		0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
 		cmd  |----------content----------|  crc
 
-- cmd: commands
-	- 0xxx: do x
+	+ cmd: commands
+		+ 0xxx: do x
+
+- 100 bits: (based on [RFC 4944](https://tools.ietf.org/html/rfc4944) section [5.3.](https://tools.ietf.org/html/rfc4944#section-5.3))
+
+							 1					 2					 3
+		 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+		+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		|  cmd  | frag? |     size/offset     |     frag_id     | pay...
+		+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+		 ...load
+		+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  																|    CRC
+		+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+				|
+		+-+-+-+-+
+
+	- `cmd`: send/recv command
+	- `frag?` fragmented message?
+		+ `1000`: No fragmentation
+		+ `1100`: First fragmentation fragment
+		+ `1110`: Subsequent fragmentation fragment
+	- `size/offset`: 
+		+ No fragmentation & first fragementation fragment: size
+			* complete length of datagram from link layer in bytes. It needs to support up to 1280 bytes (IPv6 packet) and thus is 11-bit wide.
+		+ offset into fragment for subsequent fragmentation fragments. (This is an optimization, becasue the fragments should normally arrive in order the size of the reassembled packet can be determined by the first fragmentation fragment)
+	- `frag_id` fragmentation identifier: is the same for every fragmented fragemnt for one link layer fragment (9 bits)
+	- `payload`: 64 bits (8 bytes)
 
 ***
 

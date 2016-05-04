@@ -4,6 +4,7 @@ AtomWirePlus::AtomWirePlus(uint8_t pin) : OneWire(pin) {
   // Does that work like that?
   num_nodes = 0;
   round = 0;
+  num_consecutive_search_errors = 0;
 }
 
 // Assumes msg is 64 bits (8 bytes) long
@@ -134,7 +135,7 @@ uint8_t AtomWirePlus::run(void)
 // }
 
 // Returns postion of `addr` in `addrs` array or -1 when not found
-int8_t AtomWirePlus::get_pos_of_node(uint8_t addr[64])
+inline int8_t AtomWirePlus::get_pos_of_node(uint8_t addr[64])
 {
   int i, j;
   uint8_t addr_ref[64];
@@ -213,11 +214,47 @@ uint8_t AtomWirePlus::recv_msg(uint8_t *addr, uint8_t *msg)
   }
 }
 
-void AtomWirePlus::full_search(void)
+int8_t AtomWirePlus::full_search(void)
 {
-  // uint8_t *addr;
+  int8_t temp_num_nodes, highest_pos_found, pos, index;
+  uint8_t found_addr[AWP_ADDR_BYTE_LENGTH];
 
-  // for (int i = 100; i < 0; i--) {
-  //   this->search(addr);
-  // }
+  this->reset_search();
+
+  // Search all nodes
+  for (temp_num_nodes = 1; !this->search(found_addr) && temp_num_nodes <= MAX_BLOCKS_ON_LINE; temp_num_nodes++) {
+    pos = get_pos_of_node(found_addr);
+
+    if (pos == -1) { // New address
+      if (num_nodes == MAX_BLOCKS_ON_LINE) {
+        return FALSE;
+      }
+
+      // Copy address into address array
+      for (index = 0; index < AWP_ADDR_BYTE_LENGTH; index++) {
+        addrs[num_nodes][index] = found_addr[index];
+      }
+
+      highest_pos_found = num_nodes;
+      num_nodes++;
+    } else if (pos > highest_pos_found) { // found address at highter position
+      highest_pos_found = pos;
+    }
+  }
+
+  // check if we found all nodes
+  if (temp_num_nodes == highest_pos_found + 1) {
+    // Found the right number of nodes
+    num_consecutive_search_errors = 0;
+    num_nodes = temp_num_nodes;
+    return TRUE;
+  } else {
+    // Error during search assume we have no new
+    // Reset nodes after 5 consecutive errors (allows some instability)
+    if (num_consecutive_search_errors > 5) {
+      num_nodes = 0;
+    }
+    num_consecutive_search_errors++;
+    return FALSE;
+  }
 }

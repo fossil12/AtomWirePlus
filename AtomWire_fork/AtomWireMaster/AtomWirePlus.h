@@ -44,6 +44,8 @@ class AtomWirePlus : public OneWire
     uint8_t recv_msg_p(uint8_t msg[64]);
     int8_t get_pos_of_node(uint8_t addr[64]);
 
+    uint8_t num_consecutive_search_errors;
+
   public:
     AtomWirePlus(uint8_t pin);
 
@@ -56,7 +58,7 @@ class AtomWirePlus : public OneWire
     uint8_t recv_msg(uint8_t *addr, uint8_t *msg);
 
     // We assume that only node at the end of the array are removed or added
-    void full_search(void);
+    int8_t full_search(void);
 };
 
 #endif // ATOMWIREPLUS_H

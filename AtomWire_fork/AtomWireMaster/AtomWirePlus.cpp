@@ -7,15 +7,22 @@ AtomWirePlus::AtomWirePlus(uint8_t pin) : OneWire(pin) {
 }
 
 // Assumes msg is 64 bits (8 bytes) long
-uint8_t AtomWirePlus::send_msg_p(uint8_t msg[64])
+uint8_t AtomWirePlus::send_msg_p(uint8_t msg[8])
 {
+  int not_empty_message;
   uint8_t frame[FRAME_BYTE_LENGTH];
 
   // Send bits are 0x7
   uint8_t cmd_frag = 0x70;
 
   // Check if message is empty
-  if (msg == NULL) {
+  for (not_empty_message = 8; not_empty_message > 0; not_empty_message--) {
+    if (msg[not_empty_message - 1]) {
+      break;
+    }
+  }
+
+  if (!not_empty_message) {
     this->write(cmd_frag); // send command indicating empty message
     return TRUE;
   }
@@ -44,7 +51,7 @@ uint8_t AtomWirePlus::send_msg_p(uint8_t msg[64])
   return TRUE;
 }
 
-uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[64])
+uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
 {
   uint8_t frame[FRAME_BYTE_LENGTH];
 
@@ -182,19 +189,28 @@ uint8_t AtomWirePlus::send_msg(uint8_t addr[AWP_ADDR_LENGTH], uint8_t *msg)
 
 uint8_t AtomWirePlus::recv_msg(uint8_t *addr, uint8_t *msg)
 {
-  // if (recvr_addr != NULL && recvr_msg != NULL) {
-  //   addr = recvr_addr;
-  //   msg = recvr_msg;
+  int8_t pos, index, not_empty_message;
 
-  //   recvr_addr = NULL;
-  //   recvr_msg = NULL;
+  pos = get_pos_of_node(addr);
 
-  //   return TRUE;
-  // } else {
-  //   return FALSE;
-  // }
+  if (pos == -1) {
+    return FALSE;
+  }
 
-  return FALSE;
+  not_empty_message = 0;
+  for (index = 0; index < 8; index++) {
+    msg[index] = in_msg_queue[pos][index];
+
+    if (msg[index]) {
+      not_empty_message = 1;
+    }
+  }
+
+  if (not_empty_message) {
+    return TRUE;
+  } else {
+    return -2;
+  }
 }
 
 void AtomWirePlus::full_search(void)

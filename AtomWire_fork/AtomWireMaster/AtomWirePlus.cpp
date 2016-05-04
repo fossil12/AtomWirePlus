@@ -129,15 +129,13 @@ uint8_t AtomWirePlus::run(void)
 // Returns postion of `addr` in `addrs` array or -1 when not found
 int8_t AtomWirePlus::get_pos_of_node(uint8_t addr[64])
 {
-  int i, j
+  int i, j;
   uint8_t addr_ref[64];
 
   // Because the array is (on purpose) not sorted there is no faster way than O(n).
   for (i = 0; i < num_nodes; i++) {
-    addr_ref = addrs[i];
-
     for (j = 0; j < 8; j++) {
-      if (addr[j] != addr_ref[j]) {
+      if (addr[j] != addrs[i][j]) {
         break;
       }
     }
@@ -153,7 +151,7 @@ int8_t AtomWirePlus::get_pos_of_node(uint8_t addr[64])
 
 uint8_t AtomWirePlus::send_msg(uint8_t addr[AWP_ADDR_LENGTH], uint8_t *msg)
 {
-  int8_t is_not_broadcast, iterator;
+  int8_t is_not_broadcast, index1, index2;
   // Broadcast if *addr = 0x0000 0000 0000 0000
   for (is_not_broadcast = AWP_ADDR_LENGTH; is_not_broadcast > 0; is_not_broadcast--) {
     if (addr[is_not_broadcast] != 0x00) {
@@ -167,12 +165,15 @@ uint8_t AtomWirePlus::send_msg(uint8_t addr[AWP_ADDR_LENGTH], uint8_t *msg)
     if (pos == -1) {
       return FALSE;
     }
-
-    out_msg_queue[pos] = msg; // not a good idea: When does this data get freed?
+    for (index1 = 0; index1 < 8; index1++) {
+      out_msg_queue[pos][index1] = msg[index1];
+    }
   } else {
     // queue message for everyone
-    for (iterator = 0; iterator < num_nodes; iterator++) {
-      out_msg_queue[iterator] = msg; // probably not a good idea (who frees the pointer?)
+    for (index1 = 0; index1 < num_nodes; index1++) {
+      for (index2 = 0; index2 < 8; index2++) {
+        out_msg_queue[index1][index2] = msg[index2];
+      }
     }
   }
 

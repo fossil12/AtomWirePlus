@@ -11,7 +11,7 @@ AtomWirePlus::AtomWirePlus(uint8_t pin) : OneWire(pin) {
 uint8_t AtomWirePlus::send_msg_p(uint8_t msg[8])
 {
   int not_empty_message;
-  uint8_t frame[FRAME_BYTE_LENGTH];
+  uint8_t frame[AWP_FRAME_BYTE_LENGTH];
 
   // Send bits are 0x7
   uint8_t cmd_frag = 0x70;
@@ -54,7 +54,7 @@ uint8_t AtomWirePlus::send_msg_p(uint8_t msg[8])
 
 uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
 {
-  uint8_t frame[FRAME_BYTE_LENGTH];
+  uint8_t frame[AWP_FRAME_BYTE_LENGTH];
 
   // recev bits 0x90
   this->write(0x90); // Receive request sent to sender
@@ -66,7 +66,7 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
   }
 
   // Get rest of frame
-  this->read_bytes(&frame[1], FRAME_BYTE_LENGTH - 1);
+  this->read_bytes(&frame[1], AWP_FRAME_BYTE_LENGTH - 1);
 
   // Check if it's a send request
   if ((frame[0] & 0x10) != 0x90) {
@@ -85,7 +85,7 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
 
 uint8_t AtomWirePlus::run(void)
 {
-  if ((round % REDUE_SEARCH_INTERVAL) == 0) {
+  if ((round % AWP_REDUE_SEARCH_INTERVAL) == 0) {
     full_search();
   }
 
@@ -222,11 +222,11 @@ int8_t AtomWirePlus::full_search(void)
   this->reset_search();
 
   // Search all nodes
-  for (temp_num_nodes = 1; !this->search(found_addr) && temp_num_nodes <= MAX_BLOCKS_ON_LINE; temp_num_nodes++) {
+  for (temp_num_nodes = 1; !this->search(found_addr) && temp_num_nodes <= AWP_MAX_BLOCKS_ON_LINE; temp_num_nodes++) {
     pos = get_pos_of_node(found_addr);
 
     if (pos == -1) { // New address
-      if (num_nodes == MAX_BLOCKS_ON_LINE) {
+      if (num_nodes == AWP_MAX_BLOCKS_ON_LINE) {
         return FALSE;
       }
 

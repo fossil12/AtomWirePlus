@@ -2,12 +2,7 @@
 #define ATOMWIREPLUS_H
 
 #include "AtomWire.h"
-
-#define REDUE_SEARCH_INTERVAL 4
-#define MAX_BLOCKS_ON_LINE 10
-#define FRAME_BYTE_LENGTH 13
-#define AWP_ADDR_LENGTH 64
-#define AWP_ADDR_BYTE_LENGTH AWP_ADDR_LENGTH / 8
+#include "AWP_constants.h"
 
 class AtomWirePlus : public OneWire
 {
@@ -22,15 +17,15 @@ class AtomWirePlus : public OneWire
     uint8_t round;
 
     // store all nodes (followers) on the line
-    uint8_t addrs[MAX_BLOCKS_ON_LINE][AWP_ADDR_BYTE_LENGTH];
+    uint8_t addrs[AWP_MAX_BLOCKS_ON_LINE][AWP_ADDR_BYTE_LENGTH];
 
     // Store up to one message per node to be sent out
     // Same index as in `addrs` 
-    uint8_t out_msg_queue[MAX_BLOCKS_ON_LINE][8]; // nothing if entry is NULL
+    uint8_t out_msg_queue[AWP_MAX_BLOCKS_ON_LINE][8]; // nothing if entry is NULL
 
     // Queue up to one message per node that was received
     // Same index as in `addrs`
-    uint8_t in_msg_queue[MAX_BLOCKS_ON_LINE][8]; // nothing if entry is NULL
+    uint8_t in_msg_queue[AWP_MAX_BLOCKS_ON_LINE][8]; // nothing if entry is NULL
 
     // sending buffer
     //uint8_t *sender_addr;

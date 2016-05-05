@@ -130,9 +130,11 @@ bool AtomWirePlusSlave::recvAndProcessCmd()
 
         if (matched) {
           duty();
+          // we have now 8ms unitl the next reset pulse
+          run_general_functions(8);
         } else {
-          // we have now up to 14ms until the next reset pulse
-          run_general_functions(14);
+          // we have now up to 14ms + 8ms until the next reset pulse
+          run_general_functions(22);
         }
       case 0xCC: // SKIP ROM
         // XXX: Not implemented
@@ -147,9 +149,11 @@ bool AtomWirePlusSlave::recvAndProcessCmd()
         }
         if (matched) {
           duty();
+          // we have now 8ms unitl the next reset pulse
+          run_general_functions(8);
         } else {
-          // we have now up to 14ms until the next reset pulse
-          run_general_functions(14);
+          // we have now up to 14ms + 8ms until the next reset pulse
+          run_general_functions(22);
         }
       default: // Unknow command
         if (errno == ONEWIRE_NO_ERROR)

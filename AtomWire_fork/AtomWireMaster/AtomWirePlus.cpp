@@ -85,6 +85,8 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
 
 uint8_t AtomWirePlus::run(void)
 {
+  int result = TRUE;
+
   if ((round % AWP_REDUE_SEARCH_INTERVAL) == 0) {
     full_search();
   }
@@ -111,16 +113,20 @@ uint8_t AtomWirePlus::run(void)
   // Time to send message if there is any
   // TODO: Do fragmenting before call of send_msg_p and pass important parameters
   if (!send_msg_p(out_msg_queue[current_node])) {
-    return FALSE;
+    result = FALSE;
   }
 
   // Time to receive message
   // TODO: Check for fragmenting and start assembling incoming message
   if (!recv_msg_p(in_msg_queue[current_node])) {
-    return FALSE;
+    result = FALSE;
   }
 
-  return TRUE;
+  // XXX: give the node some time to do calculations if it's only one
+  // Currently solve by give everyone 8 additional ms
+  delayMicroseconds(8);
+
+  return result;
 }
 
 // uint8_t AtomWirePlus::get_node(uint8_t pos, uint8_t *addr)

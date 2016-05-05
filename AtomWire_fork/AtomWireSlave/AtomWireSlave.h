@@ -45,8 +45,8 @@
 #define DEBUG_DISABLE_PIN(pin) DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin)); DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin));
 
 class OneWireSlave {
-    bool recvAndProcessCmd();
   protected:
+    virtual bool recvAndProcessCmd();
     uint8_t waitTimeSlot();
     uint8_t waitTimeSlotRead();
     uint8_t pin_bitmask;
@@ -69,7 +69,7 @@ class OneWireSlave {
     bool presence(uint8_t delta);
     bool presence();
     bool search();
-    bool duty();
+    virtual bool duty();
     uint8_t sendData(char buf[], uint8_t data_len);
     uint8_t recvData(char buf[], uint8_t data_len);
     void send(uint8_t v);

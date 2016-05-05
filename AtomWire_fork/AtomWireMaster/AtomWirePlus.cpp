@@ -72,7 +72,7 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
   this->read_bytes(&frame[1], AWP_FRAME_BYTE_LENGTH - 1);
 
   // Check if it's a send request
-  if ((frame[0] & 0x10) != 0x90) {
+  if ((frame[0] & 0xF0) != 0x90) {
     return FALSE;
   }
 

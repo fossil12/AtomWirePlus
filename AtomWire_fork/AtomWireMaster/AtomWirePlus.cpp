@@ -73,6 +73,7 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
     return FALSE;
   }
 
+  // TODO: Check CRC
   // TODO: Check for fragmentation and start/continue reassembly if true
 
   // Copy received message into message buffer
@@ -127,6 +128,25 @@ uint8_t AtomWirePlus::run(void)
   delayMicroseconds(8);
 
   return result;
+}
+
+uint8_t AtomWirePlus::get_next_node_addr(uint8_t *addr)
+{
+  int next_node_pos;
+
+  if (num_nodes == 0) {
+    full_search();
+  }
+
+  if (num_nodes == 0) {
+    return FALSE;
+  } else {
+    next_node_pos = (current_node + 1) % num_nodes;
+    for (int index = 0; index < 8; index++) {
+      addr[index] = addrs[next_node_pos][index];
+    }
+    return TRUE;
+  }
 }
 
 // uint8_t AtomWirePlus::get_node(uint8_t pos, uint8_t *addr)

@@ -46,6 +46,7 @@ class AtomWirePlus : public OneWire
 
     // runs a time slot and returns
     uint8_t run(void); // needs scheduling
+    uint8_t get_next_node_addr(uint8_t *addr);
     //uint8_t get_node(uint8_t pos, uint8_t *addr);
 
     // No guarantee, that the message will be immediatly sent, it might get queued

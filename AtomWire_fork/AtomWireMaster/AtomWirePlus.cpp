@@ -29,7 +29,7 @@ uint8_t AtomWirePlus::send_msg_p(uint8_t msg[8])
   }
 
   // We currently only support unfragmented messages
-  cmd_frag &= 0x8;
+  cmd_frag &= 0x08;
 
   frame[0] = cmd_frag;
 
@@ -47,7 +47,7 @@ uint8_t AtomWirePlus::send_msg_p(uint8_t msg[8])
     frame[i + 4] = msg[i];
   }
 
-  frame[12] = this->crc8(msg, 8);
+  frame[12] = this->crc8(frame, AWP_FRAME_BYTE_LENGTH - 1);
 
   return TRUE;
 }

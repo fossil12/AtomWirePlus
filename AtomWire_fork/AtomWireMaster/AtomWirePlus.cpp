@@ -5,6 +5,7 @@ AtomWirePlus::AtomWirePlus(uint8_t pin) : OneWire(pin) {
   num_nodes = 0;
   round = 0;
   num_consecutive_search_errors = 0;
+  current_node = 0;
 }
 
 // Assumes msg is 64 bits (8 bytes) long
@@ -134,9 +135,11 @@ uint8_t AtomWirePlus::get_next_node_addr(uint8_t *addr)
 {
   int next_node_pos;
 
-  if (num_nodes == 0) {
+  if (num_nodes == 0 || (round % AWP_REDUE_SEARCH_INTERVAL) == 0) {
     full_search();
   }
+
+  round++;
 
   if (num_nodes == 0) {
     return FALSE;
@@ -247,8 +250,12 @@ int8_t AtomWirePlus::full_search(void)
 
   this->reset_search();
 
+  highest_pos_found = 0;
+
   // Search all nodes
-  for (temp_num_nodes = 1; !this->search(found_addr) && temp_num_nodes <= AWP_MAX_BLOCKS_ON_LINE; temp_num_nodes++) {
+  for (temp_num_nodes = 0; this->search(found_addr) 
+                           && temp_num_nodes <= AWP_MAX_BLOCKS_ON_LINE; 
+       temp_num_nodes++) {
     pos = get_pos_of_node(found_addr);
 
     if (pos == -1) { // New address
@@ -268,8 +275,10 @@ int8_t AtomWirePlus::full_search(void)
     }
   }
 
-  // check if we found all nodes
-  if (temp_num_nodes == highest_pos_found + 1) {
+  // Check if we found all nodes
+  // or no node
+  if (temp_num_nodes == highest_pos_found  + 1 || 
+      (temp_num_nodes == 0 && highest_pos_found == 0)) {
     // Found the right number of nodes
     num_consecutive_search_errors = 0;
     num_nodes = temp_num_nodes;

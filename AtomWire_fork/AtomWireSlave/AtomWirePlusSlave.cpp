@@ -20,7 +20,7 @@ void AtomWirePlusSlave::increment_last_value()
       out_msg[index] = in_msg[index];
     }
 
-    out_msg[7] = in_msg[7]++;
+    out_msg[7] = ++in_msg[7];
 
     if (new_out_msg) {
       errno = AWP_ERR_OUT_MSG_OVERRIDDEN;
@@ -83,6 +83,8 @@ void AtomWirePlusSlave::run_general_functions(uint16_t miliseconds)
   // Loop through possible task (one task should last for less than 1 ms)
   // Check after every task if the time is expired
   while (millis() < timeout) {
+    // TODO: use a switch and global variable to do real round robin w/ the
+    // methods called here
     parse_in_frame();
     CHECK_TIMEOUT_MS(timeout);
 
@@ -101,73 +103,78 @@ bool AtomWirePlusSlave::recvAndProcessCmd()
   char addr[8];
   uint8_t oldSREG = 0;
   uint8_t matched;
+  bool result = true;
 
-  for (;;) {
-    uint8_t cmd = recv();
-    switch (cmd) {
-      case 0xF0: // SEARCH ROM
-        search();
-        delayMicroseconds(6900);
-        return FALSE;
-      case 0x33: // READ ROM
-        sendData(rom, 8);
-        if (errno != ONEWIRE_NO_ERROR) {
-          return FALSE;
-        }
+  uint8_t cmd = recv();
+  switch (cmd) {
+    case 0xF0: // SEARCH ROM
+      search();
+      delayMicroseconds(6900);
+      result = false;
+      break;
+    case 0x33: // READ ROM
+      sendData(rom, 8);
+      if (errno != ONEWIRE_NO_ERROR) {
+        result = false;
+      }
+      break;
+    case 0x55: // MATCH ROM - Choose/Select ROM
+      matched = 1;
+      recvData(addr, 8);
+      if (errno != ONEWIRE_NO_ERROR) {
+        result = false;
         break;
-      case 0x55: // MATCH ROM - Choose/Select ROM
-        matched = 1;
-        recvData(addr, 8);
-        if (errno != ONEWIRE_NO_ERROR) {
-          return FALSE;
+      }
+      for (int i=0; i<8; i++){
+        if (rom[i] != addr[i]) {
+          matched = 0;
         }
-        for (int i=0; i<8; i++){
-          if (rom[i] != addr[i]) {
-            matched = 0;
-          }
-          resumeaddr[i] = addr[i];
-        }
+        resumeaddr[i] = addr[i];
+      }
 
-        if (matched) {
-          duty();
-          // we have now 8ms unitl the next reset pulse
-          run_general_functions(8);
-        } else {
-          // we have now up to 14ms + 8ms until the next reset pulse
-          run_general_functions(22);
+      if (matched) {
+        duty();
+        // we have now 8ms unitl the next reset pulse
+        run_general_functions(8);
+      } else {
+        // we have now up to 14ms + 8ms until the next reset pulse
+        run_general_functions(22);
+      }
+    case 0xCC: // SKIP ROM
+      // XXX: Not implemented
+      break;
+    case 0x69: // RESUME ROM
+      matched = 1;
+      for (int i = 0; i < 8; i++) {
+        if (resumeaddr[i] != rom[i]) {
+          matched = 0;
+          break;
         }
-      case 0xCC: // SKIP ROM
-        // XXX: Not implemented
-        return TRUE;
-      case 0x69: // RESUME ROM
-        matched = 1;
-        for (int i = 0; i < 8; i++) {
-          if (resumeaddr[i] != rom[i]) {
-            matched = 0;
-            break;
-          }
-        }
-        if (matched) {
-          duty();
-          // we have now 8ms unitl the next reset pulse
-          run_general_functions(8);
-        } else {
-          // we have now up to 14ms + 8ms until the next reset pulse
-          run_general_functions(22);
-        }
-      default: // Unknow command
-        if (errno == ONEWIRE_NO_ERROR)
-          break; // skip if no error
-        else
-          return FALSE;
-    }
+      }
+      if (matched) {
+        duty();
+        // we have now 8ms unitl the next reset pulse
+        run_general_functions(8);
+      } else {
+        // we have now up to 14ms + 8ms until the next reset pulse
+        run_general_functions(22);
+      }
+    default: // Unknow command
+      if (errno == ONEWIRE_NO_ERROR)
+        break; // skip if no error
+      else
+        result = false;
+        break;
   }
+
+  return result;
 }
 
 bool AtomWirePlusSlave::duty(void)
 {
   uint8_t index;
   char frame[AWP_FRAME_BYTE_LENGTH];
+  bool result = true;
 
   errno = ONEWIRE_NO_ERROR;
 
@@ -175,29 +182,14 @@ bool AtomWirePlusSlave::duty(void)
   frame[0] = recv();
 
   // Depending on command receive message and store it
-  if ((frame[0] & 0x10) != 0x70) {
+  if ((frame[0] & 0xF0) != 0x70) {
     errno = AWP_ERR_WRONG_COMMAND;
     return false;
   }
 
   // A message will be sent to us
-  if ((frame[0] & 0x01) != 0) {
+  if ((frame[0] & 0x0F) != 0) {
     this->recvData(&frame[1], AWP_FRAME_BYTE_LENGTH - 1);
-
-    // Check CRC
-    if (frame[AWP_FRAME_BYTE_LENGTH - 1] == crc8(frame, AWP_FRAME_BYTE_LENGTH - 1)) {
-      // Check if we have an existing new message that will be overridden
-      if (new_in_frame) {
-        errno = AWP_ERR_IN_FRAME_OVERRIDDEN;
-      }
-
-      new_in_frame = true;
-      for (index = 0; index < AWP_FRAME_BYTE_LENGTH; index++) {
-        in_frame[index] = frame[index];
-      }
-    } else { // Not correct CRC
-      errno = AWP_ERR_WRONG_CRC;
-    }
   }
 
   // Wait for sending command to be sent
@@ -214,8 +206,30 @@ bool AtomWirePlusSlave::duty(void)
     }
   } else {
     errno = AWP_ERR_WRONG_SEND_CMD;
-    return false;
+    result = false;
   }
 
-  return true;
+  // Copy data if we received data
+  // After receving and sending otherwise we have a timing issue
+  if ((frame[0] & 0x0F) != 0) {
+    // Check CRC
+    // With 1 node we always have 2 packets with correct CRC and then
+    // 2 packets with incorrect CRC
+    if (frame[AWP_FRAME_BYTE_LENGTH - 1] == crc8(frame, AWP_FRAME_BYTE_LENGTH - 1)) {
+      // Check if we have an existing new message that will be overridden
+      if (new_in_frame) {
+        errno = AWP_ERR_IN_FRAME_OVERRIDDEN;
+      }
+
+      new_in_frame = true;
+      for (index = 0; index < AWP_FRAME_BYTE_LENGTH; index++) {
+        in_frame[index] = frame[index];
+      }
+    } else { // Not correct CRC
+      errno = AWP_ERR_WRONG_CRC;
+    }
+  }
+
+
+  return result;
 }

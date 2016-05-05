@@ -39,6 +39,11 @@
 #define DIRECT_MODE_OUTPUT(base, mask) ((*(base+1)) |= (mask))
 #define DIRECT_WRITE_LOW(base, mask)   ((*(base+2)) &= ~(mask))
 #define DIRECT_WRITE_HIGH(base, mask)  ((*(base+2)) |= (mask))
+
+// Debug macros
+#define DEBUG_ENABLE_PIN(pin) DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin)); DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin));
+#define DEBUG_DISABLE_PIN(pin) DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin)); DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin));
+
 class OneWireSlave {
   private:
     bool recvAndProcessCmd();

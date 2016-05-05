@@ -215,7 +215,7 @@ bool AtomWirePlusSlave::duty(void)
     // Check CRC
     // With 1 node we always have 2 packets with correct CRC and then
     // 2 packets with incorrect CRC
-    if (frame[AWP_FRAME_BYTE_LENGTH - 1] == crc8(frame, AWP_FRAME_BYTE_LENGTH - 1)) {
+    //if (frame[AWP_FRAME_BYTE_LENGTH - 1] == crc8(frame, AWP_FRAME_BYTE_LENGTH - 1)) {
       // Check if we have an existing new message that will be overridden
       if (new_in_frame) {
         errno = AWP_ERR_IN_FRAME_OVERRIDDEN;
@@ -225,9 +225,9 @@ bool AtomWirePlusSlave::duty(void)
       for (index = 0; index < AWP_FRAME_BYTE_LENGTH; index++) {
         in_frame[index] = frame[index];
       }
-    } else { // Not correct CRC
-      errno = AWP_ERR_WRONG_CRC;
-    }
+    // } else { // Not correct CRC
+    //   errno = AWP_ERR_WRONG_CRC;
+    // }
   }
 
 

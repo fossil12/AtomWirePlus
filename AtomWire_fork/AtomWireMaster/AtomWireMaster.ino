@@ -7,6 +7,7 @@ byte data_out[8];
 
 void setup(void) {
   Serial.begin(9600);
+  data_out[6] = 0x00;
   data_out[7] = 0x00;
   Serial.print("\n======== Begin ========\n");
 }
@@ -14,7 +15,8 @@ void setup(void) {
 void loop(void) {
   byte i;
   byte addr[8];
-  
+
+  data_out[6]++;
   data_out[7]++;
 
   Serial.print("\n-----------------------\n\n");

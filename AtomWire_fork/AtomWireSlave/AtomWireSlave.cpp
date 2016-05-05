@@ -8,12 +8,6 @@ extern "C" {
 #include <avr/pgmspace.h>
 }
 
-#define DIRECT_READ(base, mask)        (((*(base)) & (mask)) ? 1 : 0)
-#define DIRECT_MODE_INPUT(base, mask)  ((*(base+1)) &= ~(mask))
-#define DIRECT_MODE_OUTPUT(base, mask) ((*(base+1)) |= (mask))
-#define DIRECT_WRITE_LOW(base, mask)   ((*(base+2)) &= ~(mask))
-#define DIRECT_WRITE_HIGH(base, mask)  ((*(base+2)) |= (mask))
-
 //#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
 
 //ORIG: #define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(120) / 10L

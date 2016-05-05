@@ -34,6 +34,11 @@
 #define ONEWIRE_READ_TIMESLOT_TIMEOUT_LOW 7
 #define ONEWIRE_READ_TIMESLOT_TIMEOUT_HIGH 8
 
+#define DIRECT_READ(base, mask)        (((*(base)) & (mask)) ? 1 : 0)
+#define DIRECT_MODE_INPUT(base, mask)  ((*(base+1)) &= ~(mask))
+#define DIRECT_MODE_OUTPUT(base, mask) ((*(base+1)) |= (mask))
+#define DIRECT_WRITE_LOW(base, mask)   ((*(base+2)) &= ~(mask))
+#define DIRECT_WRITE_HIGH(base, mask)  ((*(base+2)) |= (mask))
 class OneWireSlave {
   private:
     bool recvAndProcessCmd();

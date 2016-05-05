@@ -15,7 +15,7 @@ extern "C" {
 //WORKING: #define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(240000) / 10L
 
 //These are the major change from original, we now wait quite a bit longer for some things
-#define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(20)
+#define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(18)
 //This TIMESLOT_WAIT_READ_RETRY_COUNT is new, and only used when waiting for the line to go low on a read
 //It was derived from knowing that the Arduino based master may go up to 130 micros more than our wait after reset
 #define TIMESLOT_WAIT_READ_RETRY_COUNT microsecondsToClockCycles(135)

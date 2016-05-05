@@ -1,6 +1,6 @@
-#include "AtomWire.h"
+#include "AtomWirePlus.h"
 
-OneWire awm(12); 
+AtomWirePlus awm(12); 
 int c = 0;
 
 void setup(void) {

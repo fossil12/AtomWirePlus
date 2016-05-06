@@ -231,6 +231,7 @@ uint8_t AtomWirePlus::recv_msg(uint8_t *addr, uint8_t *msg)
   not_empty_message = 0;
   for (index = 0; index < 8; index++) {
     msg[index] = in_msg_queue[pos][index];
+    in_msg_queue[pos][index] = 0x00;
 
     if (msg[index]) {
       not_empty_message = 1;

@@ -8,7 +8,9 @@ AtomWirePlusSlave::AtomWirePlusSlave(uint8_t pin) : OneWireSlave(pin)
   new_out_frame = false;
   new_in_msg = false;
   new_out_msg = false;
-  gpio_pin_state = 0x00;
+  // The first read will be different independent of the initial GPIO pin state
+  // because there are only pin 0 - 3 read
+  gpio_pin_state = 0x10; 
 }
 
 // Protected methods
@@ -37,7 +39,7 @@ void AtomWirePlusSlave::check_all_gpio_pins()
   uint8_t bitShift = 0x01;
     
   cli();
-  for(int i=0; i<4; i++){
+  for(int i=0; i<3; i++){
     DIRECT_MODE_INPUT(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i));
     if (DIRECT_READ(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i))) {
       gpioRvalue |= bitShift;

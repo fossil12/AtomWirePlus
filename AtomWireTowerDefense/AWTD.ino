@@ -34,12 +34,16 @@ void loop(void) {
       //if ( addr[0] != 0x3A ) return;
       nodes[j]++;
     }
-    
+    Serial.write(j); //Send Line #
     Serial.write(nodes[j]); //Send # Nodes
-    Serial.write(addr[1]); //Node ID
-    Serial.write(0x00); //Send type ('0' is default)
-    Serial.write(0x00); //Send node pin status
     
+    //Parts that should be repeated for each node on line
+    //Need to store nodes on line + implement in game
+    if (nodes[j] > 0) {
+      Serial.write(addr[1]); //Node ID
+      Serial.write(0x00); //Send type ('0' is default)
+      Serial.write(0x00); //Send node pin status ('0' default)
+    }
     nodes[j] = 0;
     awms[j]->reset_search();
   }

@@ -70,7 +70,7 @@ void AtomWirePlusSlave::check_enable_pin2()
   if (new_in_msg) {
     new_in_msg = false;
 
-    if (in_msg[0] == 0x21 && in_msg[1] == 0x22) {
+    if (in_msg[0] == 0x21 && in_msg[2] == 0x22) {
       DEBUG_ENABLE_PIN(2)
     }
   }

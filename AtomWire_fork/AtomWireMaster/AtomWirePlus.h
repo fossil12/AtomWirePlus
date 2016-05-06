@@ -4,6 +4,8 @@
 #include "AtomWire.h"
 #include "AWP_constants.h"
 
+#define MAX_MSG_QUEUE_LENGTH 10
+
 class AtomWirePlus : public OneWire
 {
   private:
@@ -27,17 +29,37 @@ class AtomWirePlus : public OneWire
     // Same index as in `addrs`
     uint8_t in_msg_queue[AWP_MAX_BLOCKS_ON_LINE][8]; // nothing if entry is NULL
 
-    uint8_t send_msg_p(uint8_t msg[64]);
-    uint8_t recv_msg_p(uint8_t msg[64]);
-    int8_t get_pos_of_node(uint8_t addr[64]);
+    int8_t get_pos_of_node(uint8_t addr[8]);
+    uint8_t send_msg_p(uint8_t msg[8]);
+    uint8_t recv_msg_p(uint8_t msg[8]);
 
     uint8_t num_consecutive_search_errors;
+
+
+    // We assume that only node at the end of the array are removed or added
+    int8_t full_search(void);
+
+    // implement a simple queue
+    struct AWPMessage {
+      uint8_t *addr;
+      uint8_t pos;
+      uint8_t *msg;
+    };
+
+    // empty if front_node == next_node
+    // insertion at next_node and then increment it
+    uint8_t front_queue_node;
+    uint8_t next_queue_node;
+    AWPMessage msg_queue[MAX_MSG_QUEUE_LENGTH];
 
   public:
     AtomWirePlus(uint8_t pin);
 
     // runs a time slot and returns
-    uint8_t run(void); // needs scheduling
+    uint8_t run(bool doSearch = true); // needs scheduling
+
+    // returns number of nodes on line or -1 on error
+    uint8_t run_all(void); // one timesolt with every node on the line
     uint8_t get_next_node_addr(uint8_t *addr);
     //uint8_t get_node(uint8_t pos, uint8_t *addr);
 
@@ -50,6 +72,18 @@ class AtomWirePlus : public OneWire
      * \warning Don't use it together with `recv_msg()`
      */
     uint8_t recv_msg_from(uint8_t *addr, uint8_t *msg);
+
+    /*
+     * Check if there is any new message
+     *
+     * \warning Don't use it together with `recv_msg_from()`
+     *
+     * \param addr Address of sender
+     * \param pos Position on current line 0 to 10, 0 is closest to base
+     * \param msg sent message
+     */
+    uint8_t recv_msg(uint8_t *addr, int8_t *pos, uint8_t *msg);
+
 };
 
 #endif // ATOMWIREPLUS_H

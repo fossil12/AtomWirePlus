@@ -6,6 +6,8 @@ AtomWirePlus::AtomWirePlus(uint8_t pin) : OneWire(pin) {
   round = 0;
   num_consecutive_search_errors = 0;
   current_node = 0;
+  front_queue_node = 0;
+  next_queue_node = 0;
 }
 
 // Assumes msg is 64 bits (8 bytes) long
@@ -55,6 +57,11 @@ uint8_t AtomWirePlus::send_msg_p(uint8_t msg[8])
   return TRUE;
 }
 
+/* Return:
+ * - 2: no new message
+ * - 1: new message
+ * - 0: error
+ */
 uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
 {
   uint8_t frame[AWP_FRAME_BYTE_LENGTH];
@@ -65,7 +72,7 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
 
   // Check if there is anything to receive
   if (frame[0] == 0x90) {
-    return TRUE;
+    return 2;
   }
 
   // Get rest of frame
@@ -73,7 +80,7 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
 
   // Check if it's a send request
   if ((frame[0] & 0xF0) != 0x90) {
-    return FALSE;
+    return 0;
   }
 
   // TODO: Check CRC
@@ -84,14 +91,15 @@ uint8_t AtomWirePlus::recv_msg_p(uint8_t msg[8])
     msg[i] = frame[i + 4];
   }
 
-  return TRUE;
+  return 1;
 }
 
-uint8_t AtomWirePlus::run(void)
+uint8_t AtomWirePlus::run(bool doSearch)
 {
+  uint8_t err;
   int result = TRUE;
 
-  if ((round % AWP_REDUE_SEARCH_INTERVAL) == 0) {
+  if ((round % AWP_REDUE_SEARCH_INTERVAL) == 0 && doSearch) {
     full_search();
   }
 
@@ -122,8 +130,18 @@ uint8_t AtomWirePlus::run(void)
 
   // Time to receive message
   // TODO: Check for fragmenting and start assembling incoming message
-  if (!recv_msg_p(in_msg_queue[current_node])) {
+  err = recv_msg_p(in_msg_queue[current_node]);
+  if (err == 0) {
     result = FALSE;
+  }
+
+  // Check if there was a new message and add it to queue
+  if (err == 1) {
+    msg_queue[next_queue_node].addr = addrs[current_node];
+    msg_queue[next_queue_node].pos = current_node;
+    msg_queue[next_queue_node].msg = in_msg_queue[current_node];
+
+    next_queue_node = (next_queue_node + 1) % MAX_MSG_QUEUE_LENGTH;
   }
 
   // XXX: give the node some time to do calculations if it's only one
@@ -131,6 +149,19 @@ uint8_t AtomWirePlus::run(void)
   delayMicroseconds(8);
 
   return result;
+}
+
+uint8_t AtomWirePlus::run_all(void)
+{
+  full_search();
+
+  // We don't care with which node we start. We just want to connect to each
+  // node once
+  for (int i = 0; i < num_nodes; i++) {
+    this->run(false);
+  }
+
+  return num_nodes;
 }
 
 uint8_t AtomWirePlus::get_next_node_addr(uint8_t *addr)
@@ -242,6 +273,27 @@ uint8_t AtomWirePlus::recv_msg_from(uint8_t *addr, uint8_t *msg)
     return TRUE;
   } else {
     return -2;
+  }
+}
+
+uint8_t AtomWirePlus::recv_msg(uint8_t *addr, int8_t *pos, uint8_t *msg)
+{
+  if (front_queue_node != next_queue_node) {
+    // we have a message in the queue
+    int index;
+
+    for (index = 0; index < 8; index++) {
+      addr[index] = msg_queue[front_queue_node].addr[index];
+      msg[index] = msg_queue[front_queue_node].msg[index];
+    }
+
+    pos[0] = msg_queue[front_queue_node].pos;
+
+    front_queue_node = (front_queue_node + 1) % MAX_MSG_QUEUE_LENGTH;
+
+    return TRUE;
+  } else {
+    return FALSE;
   }
 }
 

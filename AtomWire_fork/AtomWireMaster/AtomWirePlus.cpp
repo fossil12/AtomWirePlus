@@ -218,11 +218,12 @@ inline int8_t AtomWirePlus::get_pos_of_node(uint8_t addr[64])
   return -1;
 }
 
-uint8_t AtomWirePlus::send_msg(uint8_t addr[AWP_ADDR_LENGTH], uint8_t *msg)
+uint8_t AtomWirePlus::send_msg(uint8_t addr[AWP_ADDR_BYTE_LENGTH], uint8_t *msg)
 {
   int8_t is_not_broadcast, index1, index2;
-  // Broadcast if *addr = 0x0000 0000 0000 0000
-  for (is_not_broadcast = AWP_ADDR_LENGTH; is_not_broadcast > 0; is_not_broadcast--) {
+
+  // Broadcast if *addr = 0x00 00 00 00 00 00 00 00
+  for (is_not_broadcast = AWP_ADDR_BYTE_LENGTH; is_not_broadcast > 0; is_not_broadcast--) {
     if (addr[is_not_broadcast] != 0x00) {
       break;
     }

@@ -27,14 +27,6 @@ class AtomWirePlus : public OneWire
     // Same index as in `addrs`
     uint8_t in_msg_queue[AWP_MAX_BLOCKS_ON_LINE][8]; // nothing if entry is NULL
 
-    // sending buffer
-    //uint8_t *sender_addr;
-    //uint8_t *sender_msg;
-
-    // receving buffer
-    //uint8_t *recvr_addr;
-    //uint8_t *recvr_msg;
-
     uint8_t send_msg_p(uint8_t msg[64]);
     uint8_t recv_msg_p(uint8_t msg[64]);
     int8_t get_pos_of_node(uint8_t addr[64]);

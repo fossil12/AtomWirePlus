@@ -34,7 +34,7 @@ void setup(void) {
 //    awms[i] = new AtomWirePlus(i + offset);
 //  }
   
-  Serial.print("\n======== Begin ========\n");
+  //Serial.print("\n======== Begin ========\n");
 }
 
 void loop(void) {
@@ -42,7 +42,7 @@ void loop(void) {
   byte addr[8];
   byte pos;
 
-  Serial.print("\n-----------------------\n\n");
+  //Serial.print("\n-----------------------\n\n");
 
   /* ================================================================================
    * Send messge around
@@ -156,7 +156,7 @@ void loop(void) {
     input_recved--;
   }
 
-  Serial.print("No more messages...\n\n");
+  Serial.print("\nNo more messages...\n\n");
 
   delay(1500); // 1500 miliseconds (1.5 sec)
 
@@ -168,15 +168,15 @@ void loop(void) {
   for (i = 0; i < NUM_LINES; i++) {
     byte num_nodes = awms[i]->run_all();
 
-//    Serial.write(0xFF);
-//    Serial.write(i);
-//    Serial.write(num_nodes);
+    Serial.write(0xFF);
+    Serial.write(i);
+    Serial.write(num_nodes);
 
     // send changed status if available
     while (awms[i]->recv_msg(addr, &pos, data)) {
-//      Serial.write(addr[1]); // Send node id
-//      Serial.write(addr[2]); // Send node type (0x00 is default)
-//      Serial.write(data[1]); // Send changed node pin status
+      Serial.write(addr[1]); // Send node id
+      Serial.write(addr[2]); // Send node type (0x00 is default)
+      Serial.write(data[1]); // Send changed node pin status
     }
 
     // Check for input
@@ -195,7 +195,7 @@ void loop(void) {
       input_recved--;
     }
     
-  }*/
+  } */
   
 }
 

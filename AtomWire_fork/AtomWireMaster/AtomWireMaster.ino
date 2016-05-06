@@ -40,7 +40,7 @@ void loop(void) {
   awm.send_msg(addr, data_out);
   awm.run();
   
-  if (awm.recv_msg(addr, data) == -2) {
+  if (awm.recv_msg_from(addr, data) == -2) {
     Serial.print("\nNo message received...\n");
     return;
   }
@@ -75,7 +75,7 @@ void loop(void) {
 
   awm.run();
   
-  if (awm.recv_msg(addr, data) == -2) {
+  if (awm.recv_msg_from(addr, data) == -2) {
     Serial.print("\nNo message received...\n");
     return;
   }

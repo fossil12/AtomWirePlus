@@ -218,7 +218,7 @@ uint8_t AtomWirePlus::send_msg(uint8_t addr[AWP_ADDR_LENGTH], uint8_t *msg)
   return TRUE;
 }
 
-uint8_t AtomWirePlus::recv_msg(uint8_t *addr, uint8_t *msg)
+uint8_t AtomWirePlus::recv_msg_from(uint8_t *addr, uint8_t *msg)
 {
   int8_t pos, index, not_empty_message;
 

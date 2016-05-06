@@ -43,10 +43,13 @@ class AtomWirePlus : public OneWire
 
     // No guarantee, that the message will be immediatly sent, it might get queued
     uint8_t send_msg(uint8_t *addr, uint8_t *msg);
-    uint8_t recv_msg(uint8_t *addr, uint8_t *msg);
 
-    // We assume that only node at the end of the array are removed or added
-    int8_t full_search(void);
+    /* 
+     * Check if there is a new message from a certain node
+     *
+     * \warning Don't use it together with `recv_msg()`
+     */
+    uint8_t recv_msg_from(uint8_t *addr, uint8_t *msg);
 };
 
 #endif // ATOMWIREPLUS_H

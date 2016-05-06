@@ -139,6 +139,8 @@ void loop(void) {
   for (i = 0; i < NUM_LINES; i++) {
     byte num_nodes = awm.run_all();
 
+    Serial.write(0xFF);
+    Serial.write(i);
     Serial.write(num_nodes);
 
     // send changed status if available

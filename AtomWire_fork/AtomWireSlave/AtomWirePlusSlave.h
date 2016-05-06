@@ -50,6 +50,9 @@ class AtomWirePlusSlave : public OneWireSlave
     uint8_t gpio_pin_state;
     void check_all_gpio_pins();
 
+    // Enable pin 2 if a specific message is received
+    void check_enable_pin2();
+
   public:
     AtomWirePlusSlave(uint8_t pin);
 

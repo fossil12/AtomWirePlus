@@ -39,7 +39,7 @@ void AtomWirePlusSlave::check_all_gpio_pins()
   uint8_t bitShift = 0x01;
     
   cli();
-  for(int i=0; i<3; i++){
+  for(int i=0; i<2; i++){
     DIRECT_MODE_INPUT(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i));
     if (DIRECT_READ(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i))) {
       gpioRvalue |= bitShift;
@@ -62,6 +62,17 @@ void AtomWirePlusSlave::check_all_gpio_pins()
     }
 
     new_out_msg = true;
+  }
+}
+
+void AtomWirePlusSlave::check_enable_pin2()
+{
+  if (new_in_msg) {
+    new_in_msg = false;
+
+    if (in_msg[0] == 0x21 && in_msg[1] == 0x22) {
+      DEBUG_ENABLE_PIN(2)
+    }
   }
 }
 
@@ -127,6 +138,10 @@ void AtomWirePlusSlave::run_general_functions(uint16_t miliseconds)
     // do some other work
     //increment_last_value();
     check_all_gpio_pins();
+
+    CHECK_TIMEOUT_MS(timeout);
+
+    check_enable_pin2();
 
     CHECK_TIMEOUT_MS(timeout);
 

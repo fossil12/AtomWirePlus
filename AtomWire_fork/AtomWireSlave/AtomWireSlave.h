@@ -34,9 +34,19 @@
 #define ONEWIRE_READ_TIMESLOT_TIMEOUT_LOW 7
 #define ONEWIRE_READ_TIMESLOT_TIMEOUT_HIGH 8
 
+#define DIRECT_READ(base, mask)        (((*(base)) & (mask)) ? 1 : 0)
+#define DIRECT_MODE_INPUT(base, mask)  ((*(base+1)) &= ~(mask))
+#define DIRECT_MODE_OUTPUT(base, mask) ((*(base+1)) |= (mask))
+#define DIRECT_WRITE_LOW(base, mask)   ((*(base+2)) &= ~(mask))
+#define DIRECT_WRITE_HIGH(base, mask)  ((*(base+2)) |= (mask))
+
+// Debug macros
+#define DEBUG_ENABLE_PIN(pin) DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin)); DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin));
+#define DEBUG_DISABLE_PIN(pin) DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin)); DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(pin)),digitalPinToBitMask(pin));
+
 class OneWireSlave {
-  private:
-    bool recvAndProcessCmd();
+  protected:
+    virtual bool recvAndProcessCmd();
     uint8_t waitTimeSlot();
     uint8_t waitTimeSlotRead();
     uint8_t pin_bitmask;
@@ -59,7 +69,7 @@ class OneWireSlave {
     bool presence(uint8_t delta);
     bool presence();
     bool search();
-    bool duty();
+    virtual bool duty();
     uint8_t sendData(char buf[], uint8_t data_len);
     uint8_t recvData(char buf[], uint8_t data_len);
     void send(uint8_t v);

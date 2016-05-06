@@ -8,12 +8,6 @@ extern "C" {
 #include <avr/pgmspace.h>
 }
 
-#define DIRECT_READ(base, mask)        (((*(base)) & (mask)) ? 1 : 0)
-#define DIRECT_MODE_INPUT(base, mask)  ((*(base+1)) &= ~(mask))
-#define DIRECT_MODE_OUTPUT(base, mask) ((*(base+1)) |= (mask))
-#define DIRECT_WRITE_LOW(base, mask)   ((*(base+2)) &= ~(mask))
-#define DIRECT_WRITE_HIGH(base, mask)  ((*(base+2)) |= (mask))
-
 //#define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
 
 //ORIG: #define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(120) / 10L
@@ -21,7 +15,7 @@ extern "C" {
 //WORKING: #define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(240000) / 10L
 
 //These are the major change from original, we now wait quite a bit longer for some things
-#define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(20)
+#define TIMESLOT_WAIT_RETRY_COUNT microsecondsToClockCycles(18)
 //This TIMESLOT_WAIT_READ_RETRY_COUNT is new, and only used when waiting for the line to go low on a read
 //It was derived from knowing that the Arduino based master may go up to 130 micros more than our wait after reset
 #define TIMESLOT_WAIT_READ_RETRY_COUNT microsecondsToClockCycles(135)
@@ -87,17 +81,9 @@ bool OneWireSlave::waitForRequest(bool ignore_errors) {
   errno = ONEWIRE_NO_ERROR;
 
   for (;;) {
-    // DEBUG
-    // Write low to pin 0 - 2
-    for (int i = 0; i < 3; i++) {
-      DIRECT_MODE_OUTPUT(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-      DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(i)),digitalPinToBitMask(i));
-    }
-
     //delayMicroseconds(40);
     // Once reset is done, it waits another 30 micros
     // Master wait is 65, so we have 35 more to send our presence now that reset is done
-    DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(0)),digitalPinToBitMask(0));
     if (!waitReset(0)) {
       continue;
     }
@@ -106,18 +92,12 @@ bool OneWireSlave::waitForRequest(bool ignore_errors) {
     // then wait another 275 plus whatever wait for the line to go high to a max of 480
     // This has been modified from original to wait for the line to go high to a max of 480.
 
-    // DEBUG
-    DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
-    DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(0)),digitalPinToBitMask(0));
     if (!presence()) {
       continue;
     }
     // Now that the master should know we are here, we will get a command from the line
     // Because of our changes to the presence code, the line should be guranteed to be high
 
-    // DEBUG
-    DIRECT_WRITE_HIGH(portInputRegister(digitalPinToPort(2)),digitalPinToBitMask(2));
-    DIRECT_WRITE_LOW(portInputRegister(digitalPinToPort(1)),digitalPinToBitMask(1));
     if (recvAndProcessCmd()) {
       return TRUE;
     }

@@ -115,6 +115,10 @@ uint8_t AtomWirePlus::run(bool doSearch)
   }
 
   // reset/presence pulse
+  if (num_nodes == 1) {
+    delayMicroseconds(7000);
+  }
+
   if (!this->reset()) {
     return FALSE;
   }
@@ -146,7 +150,7 @@ uint8_t AtomWirePlus::run(bool doSearch)
 
   // XXX: give the node some time to do calculations if it's only one
   // Currently solve by give everyone 8 additional ms
-  delayMicroseconds(8);
+  delayMicroseconds(8000);
 
   return result;
 }

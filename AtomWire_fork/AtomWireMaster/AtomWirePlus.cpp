@@ -276,7 +276,7 @@ uint8_t AtomWirePlus::recv_msg_from(uint8_t *addr, uint8_t *msg)
   }
 }
 
-uint8_t AtomWirePlus::recv_msg(uint8_t *addr, int8_t *pos, uint8_t *msg)
+uint8_t AtomWirePlus::recv_msg(uint8_t *addr, uint8_t *pos, uint8_t *msg)
 {
   if (front_queue_node != next_queue_node) {
     // we have a message in the queue

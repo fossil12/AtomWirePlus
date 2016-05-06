@@ -82,7 +82,7 @@ class AtomWirePlus : public OneWire
      * \param pos Position on current line 0 to 10, 0 is closest to base
      * \param msg sent message
      */
-    uint8_t recv_msg(uint8_t *addr, int8_t *pos, uint8_t *msg);
+    uint8_t recv_msg(uint8_t *addr, uint8_t *pos, uint8_t *msg);
 
 };
 

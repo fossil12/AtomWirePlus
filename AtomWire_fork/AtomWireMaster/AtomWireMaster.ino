@@ -16,6 +16,8 @@ void loop(void) {
   byte i;
   byte addr[8];
 
+  Serial.print("\n-----------------------\n\n");
+
   /* ================================================================================
    * Send messge around
    * ================================================================================ */
@@ -23,7 +25,6 @@ void loop(void) {
   data_out[6] += 1;
   data_out[7] += 1;
 
-  Serial.print("\n-----------------------\n\n");
 
   if (!awm.get_next_node_addr(addr)) {
     Serial.print("\nNo more nodes detected...\n");
@@ -59,9 +60,7 @@ void loop(void) {
    * Check of any incoming message
    * ================================================================================ */
 
-  Serial.print("\n-----------------------\n\n");
-
-  if (!awm.get_next_node_addr(addr)) {
+  /*if (!awm.get_next_node_addr(addr)) {
     Serial.print("\nNo more nodes detected...\n");
     return;
   }
@@ -87,7 +86,37 @@ void loop(void) {
   }
   Serial.print("\n");
 
-  delay(1500); // 1500 miliseconds (1.5 sec)
+  delay(1500); // 1500 miliseconds (1.5 sec) */
+
+  /* ================================================================================
+   * Messqe queue
+   * ================================================================================ */
+  byte pos;
+
+  awm.run_all();
+
+  while (awm.recv_msg(addr, &pos, data)) {
+    Serial.print("\nAddress = ");
+    for (i = 0; i < 8; i++) {
+      Serial.print(addr[i], HEX);
+      Serial.print(" ");
+    }
+
+    Serial.print("Pos = ");
+    Serial.print(pos);
+    Serial.print("\n");
+
+    Serial.print("Msg = ");
+    for (i = 0; i < 8; i++) {
+      Serial.print(data[i], HEX);
+      Serial.print(" ");
+    }
+    Serial.print("\n\n");
+  }
+
+  Serial.print("No more messages...\n\n");
+
+  delay(1500); // 1500 miliseconds (1.5 sec) */
   
 }
 

@@ -7,8 +7,8 @@ title: Making Progress!
 This past week we've been testing the circuit with various different components in an effort to improve node detection. 
 Through this, we've upped the one-wire node limit from 3 nodes to 5 nodes.
 
-On Wednesday, April 13th, I took a closer look at the power supplied to the ATtinys. Using a multimeter, I saw that each operates using about 9 mA. When siz are powered by the same 5V power supply, a little over 50 mA is used on average.
-Also, I tested using between 0 and 3 buffers on the line. Even when powered by and external supply, only one node can run successfully when no buffers are used. Even with two buffers, only one node works all the time, while 2 will have long gaps between successes. 
+On Wednesday, April 13th, I took a closer look at the power supplied to the ATtinys. Using a multimeter, I saw that each operates using about 9 mA. When they are powered by the same 5V power supply, a little over 50 mA is used on average.
+Also, I tested using between 0 and 3 buffers on the line. Even when powered by an external supply, only one node can run successfully when no buffers are used. Even with two buffers, only one node works all the time, while 2 will have long gaps between successes. 
 Using the 3 buffers as usual with more than three nodes resulted in some error in detecting nodes, with a couple nodes being detected periodically. 
 This problem was amplified the more nodes we added. At six nodes it could detect node A2 sometimes, but not the rest. If four nodes were left on the line long enough, none would be detected anyore.
 

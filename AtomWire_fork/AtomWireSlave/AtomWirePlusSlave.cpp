@@ -8,6 +8,9 @@ AtomWirePlusSlave::AtomWirePlusSlave(uint8_t pin) : OneWireSlave(pin)
   new_out_frame = false;
   new_in_msg = false;
   new_out_msg = false;
+  // The first read will be different independent of the initial GPIO pin state
+  // because there are only pin 0 - 3 read
+  gpio_pin_state = 0x10; 
 }
 
 // Protected methods
@@ -26,6 +29,50 @@ void AtomWirePlusSlave::increment_last_value()
       errno = AWP_ERR_OUT_MSG_OVERRIDDEN;
     }
     new_out_msg = true;
+  }
+}
+
+void AtomWirePlusSlave::check_all_gpio_pins()
+{
+  // Part of the code similar to `OneWireSlave::gpioRead()`
+  uint8_t gpioRvalue = 0x00;
+  uint8_t bitShift = 0x01;
+    
+  cli();
+  for(int i=0; i<2; i++){
+    DIRECT_MODE_INPUT(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i));
+    if (DIRECT_READ(portInputRegister(digitalPinToPort(i)), digitalPinToBitMask(i))) {
+      gpioRvalue |= bitShift;
+    }
+    bitShift <<= 1;          
+  }
+  sei();
+
+  // check if one of the value changed
+  if (gpio_pin_state != gpioRvalue) {
+    gpio_pin_state = gpioRvalue;
+
+    // Create message
+    // Slave uses normally ids from 0x70 upwards
+    out_msg[0] = 0x71;
+    out_msg[1] = gpioRvalue;
+
+    if (new_out_msg) {
+      errno = AWP_ERR_OUT_MSG_OVERRIDDEN;
+    }
+
+    new_out_msg = true;
+  }
+}
+
+void AtomWirePlusSlave::check_enable_pin2()
+{
+  if (new_in_msg) {
+    new_in_msg = false;
+
+    if (in_msg[0] == 0x21 && (in_msg[1] == 0x22 || in_msg[2] == 0x22)) {
+      DEBUG_ENABLE_PIN(2)
+    }
   }
 }
 
@@ -89,7 +136,12 @@ void AtomWirePlusSlave::run_general_functions(uint16_t miliseconds)
     CHECK_TIMEOUT_MS(timeout);
 
     // do some other work
-    increment_last_value();
+    //increment_last_value();
+    check_all_gpio_pins();
+
+    CHECK_TIMEOUT_MS(timeout);
+
+    check_enable_pin2();
 
     CHECK_TIMEOUT_MS(timeout);
 

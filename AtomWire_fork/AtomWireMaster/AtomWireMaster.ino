@@ -1,25 +1,56 @@
 #include "AtomWirePlus.h"
 
-AtomWirePlus awm(12);
+AtomWirePlus awm(9);
 int c = 0;
 byte data[8];
 byte data_out[8];
+byte broadcast_addr[8];
+
+// Needed for games
+#define NUM_LINES 4
+#define MAX_INPUT_LENGTH 8
+
+AtomWirePlus **awms;
+byte input_recved = 0;
+int input[MAX_INPUT_LENGTH];
+
 
 void setup(void) {
   Serial.begin(9600);
   data_out[6] = 0x00;
   data_out[7] = 0x00;
-  Serial.print("\n======== Begin ========\n");
+
+  int i;
+
+  for (i = 0; i < 8; i++) {
+    broadcast_addr[i] = 0x00;
+    input[i] = 0x00;
+  }
+
+  // Games...
+  awms = new AtomWirePlus*[NUM_LINES];
+  byte offset = 10;
+  for (i = 0; i < NUM_LINES; i++) {
+    awms[i] = new AtomWirePlus(i + offset);
+  }
+  
+  //Serial.print("\n======== Begin ========\n");
 }
 
 void loop(void) {
   byte i;
   byte addr[8];
+  byte pos;
 
-  data_out[6]++;
-  data_out[7]++;
+  //Serial.print("\n-----------------------\n\n");
 
-  Serial.print("\n-----------------------\n\n");
+  /* ================================================================================
+   * Send messge around
+   * ================================================================================ */
+  /*
+  data_out[6] += 1;
+  data_out[7] += 1;
+
 
   if (!awm.get_next_node_addr(addr)) {
     Serial.print("\nNo more nodes detected...\n");
@@ -36,7 +67,7 @@ void loop(void) {
   awm.send_msg(addr, data_out);
   awm.run();
   
-  if (awm.recv_msg(addr, data) == -2) {
+  if (awm.recv_msg_from(addr, data) == -2) {
     Serial.print("\nNo message received...\n");
     return;
   }
@@ -49,78 +80,196 @@ void loop(void) {
   Serial.print("\n");
 
   delay(1500); // 1500 miliseconds (1.5 sec)
+  */
 
+  /* ================================================================================
+   * Check of any incoming message
+   * ================================================================================ */
+
+  /*if (!awm.get_next_node_addr(addr)) {
+    Serial.print("\nNo more nodes detected...\n");
+    return;
+  }
+
+  Serial.print("\nAddress = ");
+  for (i = 0; i < 8; i++) {
+    Serial.print(addr[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.print("\n\n");
+
+  awm.run();
   
-//  if (!awm.search(addr)) {
-//    Serial.print("\nNo further Slaves Detected.\n");
-//    awm.reset_search();
-//    return;
-//  }
-//
-//  Serial.print("\nAddress = ");
-//  for (i = 0; i < 8; i++) {
-//    Serial.print(addr[i], HEX);
-//    Serial.print(" ");
-//  }
-//
-//  if (addr[0] == 0x3A) {
-//    Serial.print("\nDevice belongs to AtomWire family.");
-//  } else {
-//    Serial.print("\nDevice family is not recognized.");
-//    return;
-//  }
-//   
-//  awm.reset();
-//  awm.select(addr);
-//  
-//  // Writing data into the scratchpad - Block, Node IDs as well as to GPIO output pins.
-//  if (addr[1] == 0xA1) {
-//    awm.write(0x22); // Write Block and Node ID into scratchpad of selected slave. 
-//  } else if (addr[1] == 0xA2) {
-//    
-//    if (c % 4 == 0) {
-//      awm.write(0x8A); // Write "E" to the GPIO pins. 
-//      //awm.write(0x21);
-//    } else if (c % 4 == 1) {
-//      awm.write(0x8C);
-//    } else if (c % 4 == 2) {
-//      awm.write(0x86);
-//    } else {
-//      awm.write(0x8E);
-//    }
-//  } else {
-//    awm.write(0x43); // Set block size to 2x2 and block/node id to 3
-//    //awm.depower();
-//  }
-//  
-//  delay(1500); // 1500 miliseconds (1.5 sec)
-//
-//  // Reading scratchpad data - Block, Node IDs as well as GPIO input pins.
-//  present = awm.reset();
-//  awm.select(addr);
-//    
-//  //if(addr[1] == 0xA1)  
-//  //awm.write(0x8D);  // Read Scratchpad - 0xBE for just read & 0xA1 for GPIO read.
-//  
-//  if(addr[1] == 0xA1) {
-//    awm.write(0xA1); // read gpio pins
-//  } else {
-//    awm.write(0xBE); // read scratchpad (without updating gpio pins)
-//  }
-//
-//  Serial.print("\nP = ");
-//  Serial.print(present, HEX);
-//  Serial.print(" ");
-//  for (i = 0; i < 9; i++) {           // we need 9 bytes
-//    data[i] = awm.read();
-//    Serial.print(data[i], HEX);
-//    Serial.print(" ");
-//  }
-//  Serial.print("\nCRC = ");
-//  Serial.print( OneWire::crc8( data, 8), HEX);
-//  Serial.println();
-//
-//  c++; 
+  if (awm.recv_msg_from(addr, data) == -2) {
+    Serial.print("\nNo message received...\n");
+    return;
+  }
+
+  Serial.print("\nMsg = ");
+  for (i = 0; i < 8; i++) {
+    Serial.print(data[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.print("\n");
+
+  delay(1500); // 1500 miliseconds (1.5 sec) */
+
+  /* ================================================================================
+   * Messqe queue
+   * ================================================================================ */
+  /*int j;
+
+  awm.run_all();
+
+  while (awm.recv_msg(addr, &pos, data)) {
+    Serial.print("\nAddress = ");
+    for (i = 0; i < 8; i++) {
+      Serial.print(addr[i], HEX);
+      Serial.print(" ");
+    }
+
+    Serial.print("Pos = ");
+    Serial.print(pos);
+    Serial.print("\n");
+
+    Serial.print("Msg = ");
+    for (i = 0; i < 8; i++) {
+      Serial.print(data[i], HEX);
+      Serial.print(" ");
+    }
+    Serial.print("\n\n");
+  }
+
+  // Check for input
+  for (j = 0; !input_recved && j < MAX_INPUT_LENGTH && (input[j] = Serial.read()) != -1; j++) {
+    // nothing to do
+  }
+
+  // We got an input
+  if (j > 0) {
+    input_recved = NUM_LINES;
+  }
+
+  // Broadcast input to all nodes
+  if (input_recved) {
+    awm.send_msg(broadcast_addr, (byte *)input);
+    input_recved--;
+  }
+
+  Serial.print("\nNo more messages...\n\n");
+
+  delay(1500); // 1500 miliseconds (1.5 sec) */
+
+  /* ================================================================================
+   * Games
+   * ================================================================================ */
+  /*int j;
+  
+  for (i = 0; i < NUM_LINES; i++) {
+    byte num_nodes = awms[i]->run_all();
+
+    Serial.write(0xFF);
+    Serial.write(i);
+    Serial.write(num_nodes);
+
+    // send changed status if available
+    while (awms[i]->recv_msg(addr, &pos, data)) {
+      Serial.write(addr[1]); // Send node id
+      Serial.write(addr[2]); // Send node type (0x00 is default)
+      Serial.write(data[1]); // Send changed node pin status
+    } /*else if (num_nodes > 0) {
+      awms[i]->get_node_zero_addr(addr);
+      Serial.write(addr[1]); // Send node id
+      Serial.write(addr[2]); // Send node type (0x00 is default)
+      Serial.write(0x10); // no new value
+    }*//*
+
+    // Check for input
+    for (j = 0; !input_recved && j < MAX_INPUT_LENGTH && (input[j] = Serial.read()) != -1; j++) {
+      // nothing to do
+    }
+
+    // We got an input
+    if (j > 0) {
+      input_recved = NUM_LINES;
+    }
+
+    // Broadcast input to all nodes
+    if (input_recved) {
+      awms[i]->send_msg(broadcast_addr, (byte *)input);
+      input_recved--;
+    }
+
+    if (num_nodes == 0) {
+      delay(100);
+    }
+    
+  }
+
+  delay(100); // 100 miliseconds */
+
+   /* ================================================================================
+   * Video
+   * ================================================================================ */
+  int j, k;
+  
+  for (i = 0; i < NUM_LINES; i++) {
+    
+    byte num_nodes = awms[i]->run_all();
+    Serial.print("Check line ");
+    Serial.print(i + 1, DEC);
+    Serial.print("...\n");
+    
+    Serial.print("Number of nodes: ");
+    Serial.print(num_nodes);
+    Serial.print("\n");
+
+    // send changed status if available
+    while (awms[i]->recv_msg(addr, &pos, data)) {
+      Serial.print("\nAddress = ");
+      for (k = 0; k < 8; k++) {
+        Serial.print(addr[k], HEX);
+        Serial.print(" ");
+      }
+  
+      Serial.print("Pos = ");
+      Serial.print(pos);
+      Serial.print("\n");
+  
+      Serial.print("Msg = ");
+      for (k = 0; k < 8; k++) {
+        Serial.print(data[k], HEX);
+        Serial.print(" ");
+      }
+      Serial.print("\n");
+    }
+    // Check for input
+    for (j = 0; !input_recved && j < MAX_INPUT_LENGTH && (input[j] = Serial.read()) != -1; j++) {
+      // nothing to do
+    }
+
+    // We got an input
+    if (j > 0) {
+      input_recved = NUM_LINES;
+    }
+
+    // Broadcast input to all nodes
+    if (input_recved) {
+      awms[i]->send_msg(broadcast_addr, (byte *)input);
+      input_recved--;
+    }
+
+    if (num_nodes == 0) {
+      delay(100);
+    }
+
+    Serial.print("\n");
+  }
+
+  Serial.print("------\n\n");
+
+  delay(1500); // 100 miliseconds */
+  
 }
 
 

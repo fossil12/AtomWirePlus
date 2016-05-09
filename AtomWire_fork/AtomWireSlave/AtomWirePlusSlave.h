@@ -38,8 +38,20 @@ class AtomWirePlusSlave : public OneWireSlave
     void parse_in_frame();
     void create_out_frame();
 
-    // Message specific methods
+    // ======================== //
+    // Message specific methods //
+    // ======================== //
+
+    // Reads a new message and increments the value of the last byte by 1
     void increment_last_value();
+
+    // Checks if the GPIO pins changed since the last call and if that's true
+    // creates a new message with the current GPIO pin state
+    uint8_t gpio_pin_state;
+    void check_all_gpio_pins();
+
+    // Enable pin 2 if a specific message is received
+    void check_enable_pin2();
 
   public:
     AtomWirePlusSlave(uint8_t pin);

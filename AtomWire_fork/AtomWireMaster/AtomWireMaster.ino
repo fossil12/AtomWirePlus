@@ -1,6 +1,6 @@
 #include "AtomWirePlus.h"
 
-AtomWirePlus awm(12);
+AtomWirePlus awm(9);
 int c = 0;
 byte data[8];
 byte data_out[8];

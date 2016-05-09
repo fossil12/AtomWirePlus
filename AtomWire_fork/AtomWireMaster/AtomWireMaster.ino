@@ -177,7 +177,12 @@ void loop(void) {
       Serial.write(addr[1]); // Send node id
       Serial.write(addr[2]); // Send node type (0x00 is default)
       Serial.write(data[1]); // Send changed node pin status
-    }
+    } /*else if (num_nodes > 0) {
+      awms[i]->get_node_zero_addr(addr);
+      Serial.write(addr[1]); // Send node id
+      Serial.write(addr[2]); // Send node type (0x00 is default)
+      Serial.write(0x10); // no new value
+    }*//*
 
     // Check for input
     for (j = 0; !input_recved && j < MAX_INPUT_LENGTH && (input[j] = Serial.read()) != -1; j++) {
@@ -194,8 +199,14 @@ void loop(void) {
       awms[i]->send_msg(broadcast_addr, (byte *)input);
       input_recved--;
     }
+
+    if (num_nodes == 0) {
+      delay(100);
+    }
     
   }
+
+  delay(100); // 100 miliseconds */
   
 }
 

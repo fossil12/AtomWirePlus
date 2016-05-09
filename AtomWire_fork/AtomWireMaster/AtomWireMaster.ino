@@ -163,7 +163,7 @@ void loop(void) {
   /* ================================================================================
    * Games
    * ================================================================================ */
-  int j;
+  /*int j;
   
   for (i = 0; i < NUM_LINES; i++) {
     byte num_nodes = awms[i]->run_all();
@@ -207,6 +207,68 @@ void loop(void) {
   }
 
   delay(100); // 100 miliseconds */
+
+   /* ================================================================================
+   * Video
+   * ================================================================================ */
+  int j, k;
+  
+  for (i = 0; i < NUM_LINES; i++) {
+    
+    byte num_nodes = awms[i]->run_all();
+    Serial.print("Check line ");
+    Serial.print(i + 1, DEC);
+    Serial.print("...\n");
+    
+    Serial.print("Number of nodes: ");
+    Serial.print(num_nodes);
+    Serial.print("\n");
+
+    // send changed status if available
+    while (awms[i]->recv_msg(addr, &pos, data)) {
+      Serial.print("\nAddress = ");
+      for (k = 0; k < 8; k++) {
+        Serial.print(addr[k], HEX);
+        Serial.print(" ");
+      }
+  
+      Serial.print("Pos = ");
+      Serial.print(pos);
+      Serial.print("\n");
+  
+      Serial.print("Msg = ");
+      for (k = 0; k < 8; k++) {
+        Serial.print(data[k], HEX);
+        Serial.print(" ");
+      }
+      Serial.print("\n");
+    }
+    // Check for input
+    for (j = 0; !input_recved && j < MAX_INPUT_LENGTH && (input[j] = Serial.read()) != -1; j++) {
+      // nothing to do
+    }
+
+    // We got an input
+    if (j > 0) {
+      input_recved = NUM_LINES;
+    }
+
+    // Broadcast input to all nodes
+    if (input_recved) {
+      awms[i]->send_msg(broadcast_addr, (byte *)input);
+      input_recved--;
+    }
+
+    if (num_nodes == 0) {
+      delay(100);
+    }
+
+    Serial.print("\n");
+  }
+
+  Serial.print("------\n\n");
+
+  delay(1500); // 100 miliseconds */
   
 }
 

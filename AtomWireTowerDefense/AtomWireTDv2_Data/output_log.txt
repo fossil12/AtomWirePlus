@@ -1,0 +1,35 @@
+Mono path[0] = 'C:/Users/Public/Documents/Unity Projects/AtomWireTD/AtomWireTDv2_Data/Managed'
+Mono path[1] = 'C:/Users/Public/Documents/Unity Projects/AtomWireTD/AtomWireTDv2_Data/Mono'
+Mono config path = 'C:/Users/Public/Documents/Unity Projects/AtomWireTD/AtomWireTDv2_Data/Mono/etc'
+PlayerConnection initialized from C:/Users/Public/Documents/Unity Projects/AtomWireTD/AtomWireTDv2_Data (debug = 0)
+PlayerConnection initialized network socket : 0.0.0.0 55251
+Multi-casting "[IP] 158.130.106.114 [Port] 55251 [Flags] 2 [Guid] 2897993962 [EditorId] 3980322117 [Version] 1048832 [Id] WindowsPlayer(ANGELINA-PC) [Debug] 0" to [225.0.0.222:54997]...
+PlayerConnection already initialized - listening to [158.130.106.114:55251]
+Initialize engine version: 5.3.4f1 (fdbb5133b820)
+GfxDevice: creating device client; threaded=1
+Direct3D:
+    Version:  Direct3D 11.0 [level 10.0]
+    Renderer: ATI Radeon HD 3200 Graphics (ID=0x9612)
+    Vendor:   ATI
+    VRAM:     947 MB
+Begin MonoManager ReloadAssembly
+Platform assembly: C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\Assembly-CSharp-firstpass.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\Assembly-CSharp-firstpass.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+- Completed reload, in  0.580 seconds
+Platform assembly: C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Public\Documents\Unity Projects\AtomWireTD\AtomWireTDv2_Data\Managed\System.dll (this message is harmless)
+desktop: 1366x768 60Hz; virtual: 1366x768 at 0,0
+<RI> Initializing input.
+<RI> Input initialized.
+<RI> Initialized touch support.
+UnloadTime: 7.872578 ms
+Setting up 1 worker threads for Enlighten.
+  Thread -> id: 1e0c -> priority: 1 

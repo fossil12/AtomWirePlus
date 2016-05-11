@@ -1,13 +1,4 @@
-# AtomWire+ TDMA
-
-_Work in progress..._
-
-- How do we handle adding and deleting of nodes after/during a new search?
-- Where who gets the next transmission spot?
-- How long does a search take?
-- What is the minimum delay for from adding one block to adding the next block? (i.e. how often do we need to search for new nodes?)
-- What happens when a node is removed before or during communication with it?
-- Reliable link layer with acks?
+# AtomWire+ protocol
 
 ## Timings and sizes
 
@@ -69,7 +60,9 @@ _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](h
 
 ## Message format
 
-- 64 bits (8 bytes): 7 bytes content + 1 byte crc
+### 64 bits (8 bytes) 
+
+7 bytes content + 1 byte crc
 
 		msb                                 lsb
 		0xff 0xff 0xff 0xff 0xff 0xff 0xff 0xff
@@ -78,7 +71,9 @@ _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](h
 	+ cmd: commands
 		+ 0xxx: do x
 
-- 104 bits: (based on [RFC 4944](https://tools.ietf.org/html/rfc4944) section [5.3.](https://tools.ietf.org/html/rfc4944#section-5.3))
+### 104 bits
+
+(based on [RFC 4944](https://tools.ietf.org/html/rfc4944) section [5.3.](https://tools.ietf.org/html/rfc4944#section-5.3))
 
 							 1					 2					 3
 		 0 1 2 3|4 5 6 7|8 9 0 1|2 3 4 5|6 7 8 9|0 1 2 3|4 5 6 7|8 9 0 1
@@ -114,3 +109,12 @@ _Based on timings of the DS2413 data sheet and AtomWire code. See [this table](h
 ## ATtiny85
 
 8 MHz = 8 clock cycles per µs
+
+## Questions to think about
+
+- How do we handle adding and deleting of nodes after/during a new search?
+- Where who gets the next transmission spot?
+- How long does a search take?
+- What is the minimum delay for from adding one block to adding the next block? (i.e. how often do we need to search for new nodes?)
+- What happens when a node is removed before or during communication with it?
+- Reliable link layer with acks?

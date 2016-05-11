@@ -189,12 +189,12 @@ uint8_t AtomWirePlus::get_next_node_addr(uint8_t *addr)
   }
 }
 
-void AtomWirePlus::get_node_zero_addr(uint8_t *addr)
-{
-  for (int i = 0; i < 8; i++) {
-    addr[i] = addrs[0][i];
-  }
-}
+// void AtomWirePlus::get_node_zero_addr(uint8_t *addr)
+// {
+//   for (int i = 0; i < 8; i++) {
+//     addr[i] = addrs[0][i];
+//   }
+// }
 
 
 // uint8_t AtomWirePlus::get_node(uint8_t pos, uint8_t *addr)

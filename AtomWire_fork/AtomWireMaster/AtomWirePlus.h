@@ -62,7 +62,7 @@ class AtomWirePlus : public OneWire
     uint8_t run_all(void); // one timesolt with every node on the line
     uint8_t get_next_node_addr(uint8_t *addr);
     //uint8_t get_node(uint8_t pos, uint8_t *addr);
-    void get_node_zero_addr(uint8_t *addr);
+    //void get_node_zero_addr(uint8_t *addr);
 
     // No guarantee, that the message will be immediatly sent, it might get queued
     uint8_t send_msg(uint8_t *addr, uint8_t *msg);

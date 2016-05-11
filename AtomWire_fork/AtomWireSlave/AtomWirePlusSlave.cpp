@@ -127,7 +127,7 @@ void AtomWirePlusSlave::run_general_functions(uint16_t miliseconds)
 
   timeout = millis() + miliseconds - 1; // stay safe by removing 1 ms
 
-  // Loop through possible task (one task should last for less than 1 ms)
+  // Loop through possible task (one task should last for less than 2 ms)
   // Check after every task if the time is expired
   while (millis() < timeout) {
     // TODO: use a switch and global variable to do real round robin w/ the

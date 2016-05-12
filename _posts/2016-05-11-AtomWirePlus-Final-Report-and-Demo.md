@@ -6,7 +6,7 @@ author: Angelina Risi
 
 ## Demo Video
 
-<iframe src="https://player.vimeo.com/video/166316296" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+<style>.embed-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin-bottom: 1em; } .embed-container iframe, .embed-container object, .embed-container embed { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }</style><div class='embed-container'><iframe src='https://player.vimeo.com/video/166316296?byline=0&portrait=0' frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe></div>
 
 The demonstration video shows the current working functionality of AtomWire+, using cuts of footage of playing the two demonstration games and displaying serial monitor outputs parallel to the manipulation of the circuit.
 

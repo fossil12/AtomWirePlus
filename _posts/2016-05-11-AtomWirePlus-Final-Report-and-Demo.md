@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Step 1 - What is AtomWire?"
+title: "AtomWire+ Final Report and Demo"
 author: Angelina Risi
 ---
 ## Demo Video

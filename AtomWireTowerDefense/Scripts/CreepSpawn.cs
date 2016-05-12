@@ -4,22 +4,28 @@ using System.Collections;
 
 public class CreepSpawn : MonoBehaviour {
 
+	//number of waves of creeps per game
 	public const int NUM_WAVES = 5;
-
+	
+	//Creep start and end positions
 	public Vector3 startZone;
 	public Vector3 endZone;
 
+	//Counts
 	public int creepCount;
 	public int lives;
 	public int wave;
 
+	//HUD Text
 	public Text lifeText;
 	public Text creepText;
 	public Text waveText;
 	public Text endText;
 
+	//raptor pre-fab
 	public GameObject raptor;
 
+	//Store wave names and enemy types; this implementation only has one
 	public string[] waves = new string[NUM_WAVES];
 	public GameObject[] creeps = new GameObject[NUM_WAVES];
 
@@ -35,8 +41,11 @@ public class CreepSpawn : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		//update lives and creep count display each frame
 		lifeText.text = "Lives: " + lives;
 		creepText.text = "Creeps: " + creepCount;
+		
+		//check if reached end game
 		if (lives < 1) {
 			endGame (0);
 		}
@@ -46,6 +55,8 @@ public class CreepSpawn : MonoBehaviour {
 	}
 
 	IEnumerator startWave() {
+		//generates waves of creeps over time until reach final wave
+		
 		while (wave < NUM_WAVES) {
 			creepText.text = "Creeps: " + creepCount;
 			if (creepCount == 0) {
@@ -72,6 +83,8 @@ public class CreepSpawn : MonoBehaviour {
 	}
 
 	void endGame(int condition) {
+		//ends the game
+		
 		StopCoroutine ("startWave");
 
 		byte[] output = { 0x21, 0x22 };

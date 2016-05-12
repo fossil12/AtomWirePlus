@@ -2,6 +2,15 @@
 using System.Collections;
 using System.IO.Ports;
 
+/*
+	Controls the tower construction, destruction and use
+	by interfacing with AtomWire through the serial port.
+	Similar to the "Test" script in the block game, as 
+	they recieve the exact smae inputs.
+	This one uses all the inputs, but only uses one node 
+	per line.
+*/
+
 public class PlayerControl : MonoBehaviour
 {
 
@@ -9,28 +18,30 @@ public class PlayerControl : MonoBehaviour
 	public const int X_LENGTH = 10;
 	public const int Z_LENGTH = 10;
 
-	public const int NUM_LINES = 4;
-	public const int NUM_TOWER_TYPES = 2;
-	public Vector3[] twr_pos = new Vector3[NUM_LINES];
+	public const int NUM_LINES = 4; //number of 1-wire lines
+	public const int NUM_TOWER_TYPES = 2; //number of available tower types
+	public Vector3[] twr_pos = new Vector3[NUM_LINES]; //the four available tower positions
 
-	public SerialPort awInput = new SerialPort ("COM5", 9600);
+	public SerialPort awInput = new SerialPort ("COM5", 9600); //initialize serial port on COM5
 
-	public int[] block_cnt = new int[NUM_LINES];
+	public int[] block_cnt = new int[NUM_LINES]; //number of blocks per line
 
-	public GameObject[] tower_pre = new GameObject[NUM_TOWER_TYPES];
+	public GameObject[] tower_pre = new GameObject[NUM_TOWER_TYPES]; //stores the tower type pre-fabs
 
-	public GameObject[] towers = new GameObject[NUM_LINES];
+	public GameObject[] towers = new GameObject[NUM_LINES]; //stores the tower on each line
 
-	int[] postpone_destroy = new int[NUM_LINES];
+	int[] postpone_destroy = new int[NUM_LINES]; //part of reducing flickering if node not detected when it should be
 
 	// Use this for initialization
 	void Start ()
 	{
-		awInput.Open ();
+		awInput.Open (); //open serial port
+		//initialize block count, frame count
 		for (int i = 0; i < NUM_LINES; i++) {
 			block_cnt [i] = 0;
 			postpone_destroy [i] = 0;
 		}
+		//set tower positions
 		twr_pos [0] = new Vector3 (30, 5, 20);
 		twr_pos [1] = new Vector3 (30, 5, 80);
 		twr_pos [2] = new Vector3 (70, 5, 20);
@@ -112,6 +123,8 @@ public class PlayerControl : MonoBehaviour
 
 	void updateTwr (GameObject tower_obj, int status)
 	{
+		//Updates tower status or shoots based on inputs
+		
 		Tower tower = tower_obj.GetComponent<Tower> ();
 		if (status > 0) {
 			tower.shoot ();
@@ -120,6 +133,7 @@ public class PlayerControl : MonoBehaviour
 
 	GameObject buildTwr (int id, int type, int line)
 	{
+		//initializes new towers
 		
 		GameObject new_twr = (GameObject)Instantiate (tower_pre [type], twr_pos [line], tower_pre [type].transform.rotation);
 

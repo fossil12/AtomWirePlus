@@ -3,10 +3,16 @@ layout: post
 title: "AtomWire+ Final Report and Demo"
 author: Angelina Risi
 ---
+
 ## Demo Video
+
+<iframe src="https://player.vimeo.com/video/166316296" width="640" height="360" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+
 The demonstration video shows the current working functionality of AtomWire+, using cuts of footage of playing the two demonstration games and displaying serial monitor outputs parallel to the manipulation of the circuit.
 
 ## Final Report
+
 On March 6th we completed the official demo of AtomWire+. Much of the progress was made during the week between the first demo and this final demo, as David implemented the new network protocol, allowing arbitrary messages between the master and slave nodes, and I developed two simple games to demonstrate interfacing with this system. The final report outlines the current state of the project in all its glory. You can find the final report here:
 
-[AtomWire+ Final Report](https://docs.google.com/document/d/1toPThpBCSNtpZsruHBicHuylUEN3GBtxlYa6yCWUuys/edit?usp=sharing)
+- [AtomWire+ Final Report](https://docs.google.com/document/d/1toPThpBCSNtpZsruHBicHuylUEN3GBtxlYa6yCWUuys/edit?usp=sharing)
+- [AtomWire+ Code](https://github.com/fossil12/AtomWirePlus)
